@@ -17,6 +17,9 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+# Matlab Autosaves
+*.asv
+
 # =========================
 # Operating System Files
 # =========================
@@ -45,4 +48,4 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
-.asv
+
