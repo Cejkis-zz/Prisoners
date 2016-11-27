@@ -1,6 +1,12 @@
-
+clc;
 clear;
 ROUNDS = 100;
+
+%Set up state variables.
+global isEvil;
+
+isEvil=0;
+
 
 % creating handlers for all strategies
 alwaysCoop = @AlwaysCooperate;
