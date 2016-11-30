@@ -29,7 +29,8 @@ for i = 1:nrOfStrategies
        
        for r = 1: ROUNDS
             p1 = strategiesHandles{i}(history); % get the move of each prisoner
-            p2 = strategiesHandles{j}(history);
+            p2 = strategiesHandles{j}([history(:,2),history(:,1)]); % history columns need to be swapped
+            
             history = [history; p1 p2]; % update history matrix
             utilities = PrisonersRound(p1, p2); % compute utilities for both prisoners
             score = score + utilities; 

@@ -1,4 +1,6 @@
-function [ output_args ] = ParticleSwarm(net )
+function [ output_args ] = ParticleSwarm(net, strategiesForNN )
+% Optimises (searches for best weights) neural network from against strategies using PSO. 
+% Returns best weights found 
 
 % parameters of PSO
 popSize = 10; % has impact on speed (default: 20)
@@ -28,11 +30,12 @@ swarmBestFitness = 0;
 
 for it = 1:100
     
-    fprintf('iteration: %d, avg fitness: %f\n ', it, mean(fitness));
+    fprintf('iteration: %d, avg fitness: %f, velocity factor %f\n ', it, mean(fitness), velocityFactor);
     
+    % Evaluate all particles, update particle and swarm best.
     for i = 1:popSize
         
-        fitness(i) = EvaluateNetwork(population(i,:), net);
+        fitness(i) = EvaluateNetwork(population(i,:), net, strategiesForNN);
         
         if fitness(i) > particleBestFitness(i)
             
@@ -50,12 +53,12 @@ for it = 1:100
         
     end
     
+    % Update directions for all particles
     for i = 1:popSize
         
-        q = rand;
-        r = rand;
-        
-        velocity(i,:) = velocityFactor*velocity(i,:) + c1*q*(particleBest(i,:) - population(i,:)) + c2*r*(swarmBest - population(i,:));
+        % The most important part - how does the velocity changes for each
+        % particle
+        velocity(i,:) = velocityFactor*velocity(i,:) + c1*rand*(particleBest(i,:) - population(i,:)) + c2*rand*(swarmBest - population(i,:));
         
         % restriction
         if (norm(velocity(i,:))) > vMax
@@ -75,6 +78,7 @@ for it = 1:100
         
     end
     
+    % Lower the velocity factor
     if velocityFactor > velocityFactorMin
         velocityFactor = velocityFactor*velocityFactorChange;
     end
