@@ -4,7 +4,7 @@ clear
 figure()
 %% Parameters
 %The number of iterations the complete simulation will run for.
-epochs=1000;
+epochs=100;
 
 % The size of each sub population.
 subPop=100;
@@ -54,15 +54,19 @@ endsave=gameRounds-startSave;
 %For all of the epochs.
 for n=1:epochs
     
+    %Reset the states.
+    isEvil=0;
+    threeCounter=0;
+    
     %Draw the pop dynamics.
     for s=1:nrOfStrategies
         addpoints(container{s},n,population(s));
     end
     drawnow;
-    pause(0.5);
+    %pause(0.1);
     %plot(repmat(n,size(population))',population')
     %scatter(repmat(n,size(population)),population);
- 
+    
     
     results = zeros(nrOfStrategies);
     
