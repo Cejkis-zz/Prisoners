@@ -11,7 +11,7 @@ if size(history,1) ==0
 end
 
 %Risk of turning madly evil.
-if (~isEvil && rand>0.99)
+if (~isEvil && rand>0.995)
     isEvil=1;
 end
 
