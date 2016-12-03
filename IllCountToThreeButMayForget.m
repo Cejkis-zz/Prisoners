@@ -18,15 +18,15 @@ end
 
 %Randomly forget the grudge (or count).
 if(rand>.75)
-    clc
-    disp('I seem to have forgotten something.')
+    %clc
+    %disp('I seem to have forgotten something.')
     threeCounter=0;
 end
 
 %If counter has reched 3 or more then always defect.
 if (threeCounter>=3)
-    clc
-    disp('Now im angry!')
+    %clc
+    %disp('Now im angry!')
     out = 0;
 else
     %Play nice.
