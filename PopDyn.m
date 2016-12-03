@@ -9,11 +9,17 @@ epochs=200;
 % The initial magnitude of each sub population.
 popMag=1000;
 
+%The lowest possible population before dying out.
+critPop=1;
+
 %Rounds to run the pd-game for.
 gameRounds=100;
 %How much of the pd rounds that will be cut of. Eg 0.80 would mean that 10%
 %at each end of the rounds will be cut of and averaged.
 exPer=0.80;
+
+%Setting for having a risk of mistakes happening.
+mistakeProb=0.02;
 
 %% State variables.
 global isEvil threeCounter;
@@ -44,8 +50,14 @@ population=population/norm(population).*popMag;
 container=cell(nrOfStrategies,1);
 
 for n=1:nrOfStrategies
-    container{n}=animatedline('Color',[rand rand rand]);
+    aline=animatedline('Color',[rand rand rand]);
+    set(aline,'DisplayName',func2str(strategiesHandles{n}));
+    %container{n}=animatedline('Color',[rand rand rand]);
+    container{n}=aline;
 end
+
+legend('Location','eastoutside')
+legend('show')
 
 %% CORE ALGO
 startSave=floor(gameRounds*(1-exPer)/2);
@@ -86,7 +98,17 @@ for n=1:epochs
                 
                 % get the move of each player.
                 p1 = h1(history(1:r-1,:));
+                %Change columns of the history for the opponent.
                 p2 = h2([history(1:r-1,2),history(1:r-1,1)]);
+                
+                %A mistake might occur. This causes choice to "flip".
+                if(rand<mistakeProb)
+                    p1=~p1;
+                end
+                if(rand<mistakeProb)
+                    p2=~p2;
+                end
+                
                 
                 % update history matrix.
                 history(r,:) = [p1 p2];
@@ -123,7 +145,7 @@ for n=1:epochs
     population=population./norm(population).*popMag;
     
     %If strategies falls below 1 individual, they die and are removed.
-    Gr=(population<20);
+    Gr=(population<critPop);
     %If at least one species has fallen below 1 agent then remove it
     if (find(Gr))
         %Remove the strategy
@@ -134,7 +156,7 @@ for n=1:epochs
         
         %Reformat the cell arrays
         strategiesHandles=strategiesHandles(~cellfun('isempty',strategiesHandles));
-         container=container(~cellfun('isempty',container));
+        container=container(~cellfun('isempty',container));
         
         %Update the count.
         nrOfStrategies=length(strategiesHandles);
@@ -147,6 +169,9 @@ for n=1:epochs
     end
 end
 
+%Print the strategies still alive. And their share of the population.
+strategiesHandles
+population
 
 
 
