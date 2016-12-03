@@ -17,7 +17,7 @@ if (history(end,2)==0)
 end
 
 %Randomly forget the grudge (or count).
-if(rand>.75)
+if(rand>.85)
     %clc
     %disp('I seem to have forgotten something.')
     threeCounter=0;

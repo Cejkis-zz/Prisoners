@@ -4,7 +4,7 @@ clear
 figure(1)
 %% Parameters
 %The number of iterations the complete simulation will run for.
-epochs=200;
+epochs=250;
 
 % The initial magnitude of each sub population.
 popMag=1000;
@@ -13,13 +13,13 @@ popMag=1000;
 critPop=1;
 
 %Rounds to run the pd-game for.
-gameRounds=100;
+gameRounds=200;
 %How much of the pd rounds that will be cut of. Eg 0.80 would mean that 10%
 %at each end of the rounds will be cut of and averaged.
 exPer=0.80;
 
 %Setting for having a risk of mistakes happening.
-mistakeProb=0.02;
+mistakeProb=0.05;
 
 %% State variables.
 global isEvil threeCounter;
@@ -37,7 +37,8 @@ iCTTBMF=@IllCountToThreeButMayForget;
 WWYD15=@WhatWillYouDo15;
 
 %Store in cell array.
-strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,iCTTBMF,WWYD15};
+ strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,iCTTBMF,WWYD15};
+% strategiesHandles = {random, random, random, random, random,random,random};
 nrOfStrategies = length(strategiesHandles);
 
 %% Set up initial population.
@@ -52,7 +53,6 @@ container=cell(nrOfStrategies,1);
 for n=1:nrOfStrategies
     aline=animatedline('Color',[rand rand rand]);
     set(aline,'DisplayName',func2str(strategiesHandles{n}));
-    %container{n}=animatedline('Color',[rand rand rand]);
     container{n}=aline;
 end
 
@@ -70,7 +70,6 @@ for n=1:epochs
     isEvil=0;
     threeCounter=0;
     
-    
     %Draw the pop dynamics.
     for s=1:nrOfStrategies
         addpoints(container{s},n,population(s));
@@ -79,8 +78,7 @@ for n=1:epochs
     %pause(0.1);
     %plot(repmat(n,size(population))',population')
     %scatter(repmat(n,size(population)),population);
-    
-    
+
     results = zeros(nrOfStrategies);
     
     %Play all strategies against eachother.
@@ -109,11 +107,10 @@ for n=1:epochs
                     p2=~p2;
                 end
                 
-                
-                % update history matrix.
+                %Update history matrix.
                 history(r,:) = [p1 p2];
                 
-                % compute utilities for both players.
+                %Compute utilities for both players.
                 utilities(r,:) = PrisonersRound(p1, p2);
             end
             
@@ -144,15 +141,17 @@ for n=1:epochs
     %Renormalize to correct population size.
     population=population./norm(population).*popMag;
     
-    %If strategies falls below 1 individual, they die and are removed.
-    Gr=(population<critPop);
-    %If at least one species has fallen below 1 agent then remove it
-    if (find(Gr))
+    %If strategies falls below the critical point, they die and are removed.
+    Gr=(population<critPop); %Gr-->GrimReaper has arrived.
+    idx=find(Gr);
+    if (idx)
+        for p=1:length(idx)
         %Remove the strategy
-        strategiesHandles{Gr}=[];
+        strategiesHandles{idx(p)}=[];
         
         %Remove the line from the update list.
-        container{Gr}=[];
+        container{idx(p)}=[];
+        end
         
         %Reformat the cell arrays
         strategiesHandles=strategiesHandles(~cellfun('isempty',strategiesHandles));
@@ -164,14 +163,13 @@ for n=1:epochs
         %Update the population variable
         population(Gr)=0;
         population=population(population~=0);
-        
-        sum(population)
+
     end
 end
 
 %Print the strategies still alive. And their share of the population.
-strategiesHandles
-population
+disp(strategiesHandles)
+disp(population')
 
 
 
