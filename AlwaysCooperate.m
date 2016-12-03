@@ -1,5 +1,15 @@
-function [ out ] = AlwaysCooperate( history )
-
-out = 1;
-
+classdef AlwaysCooperate < Strategy
+    %ALWAYSCOOPERATE Summary of this class goes here
+    %   Detailed explanation goes here
+    
+    properties
+    end
+    
+    methods
+        function [ out ] = Action(obj, history )
+            out = 1;
+        end
+    end
+    
 end
+
