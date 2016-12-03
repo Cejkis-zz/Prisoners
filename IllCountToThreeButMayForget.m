@@ -3,7 +3,7 @@ classdef IllCountToThreeButMayForget< Strategy
     %passed, it will defect constantly untill it forgets its grudge.
     
     properties
-        threeCounter;
+        threeCounter=0;
     end
     
     methods

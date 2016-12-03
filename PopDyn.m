@@ -22,23 +22,24 @@ exPer=0.80;
 mistakeProb=0.05;
 
 %% State variables.
-global isEvil threeCounter;
-isEvil=0;
+global  threeCounter;
 threeCounter=0;
 
 %% Set up the involved strategies.
 
-alwaysCoop = @AlwaysCooperate;
-alwaysDefect = @AlwaysDefect;
-titForTat = @TitForTat;
-turnEvil = @TurnEvil_state;
-random = @Random;
-iCTTBMF=@IllCountToThreeButMayForget;
-WWYD15=@WhatWillYouDo15;
+alwaysCoop = AlwaysCooperate;
+alwaysDefect = AlwaysDefect;
+titForTat = TitForTat;
+turnEvil = TurnEvil;
+random = Random;
+iCTTBMF=IllCountToThreeButMayForget;
+WWYD15=WhatWillYouDo15;
+%Set parameter values in the objects.
+WWYD15.horizon=15;
+WWYD15.tresh=0.25;
 
 %Store in cell array.
  strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,iCTTBMF,WWYD15};
-% strategiesHandles = {random, random, random, random, random,random,random};
 nrOfStrategies = length(strategiesHandles);
 
 %% Set up initial population.
@@ -52,7 +53,7 @@ container=cell(nrOfStrategies,1);
 
 for n=1:nrOfStrategies
     aline=animatedline('Color',[rand rand rand]);
-    set(aline,'DisplayName',func2str(strategiesHandles{n}));
+    set(aline,'DisplayName',class(strategiesHandles{n}));
     container{n}=aline;
 end
 
@@ -95,9 +96,9 @@ for n=1:epochs
             for r = 1: gameRounds
                 
                 % get the move of each player.
-                p1 = h1(history(1:r-1,:));
+                p1 = h1.Action(history(1:r-1,:));
                 %Change columns of the history for the opponent.
-                p2 = h2([history(1:r-1,2),history(1:r-1,1)]);
+                p2 = h2.Action([history(1:r-1,2),history(1:r-1,1)]);
                 
                 %A mistake might occur. This causes choice to "flip".
                 if(rand<mistakeProb)
