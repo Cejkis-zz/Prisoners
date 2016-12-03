@@ -3,28 +3,20 @@ clear;
 ROUNDS = 100;
 
 % creating handlers for all strategies
-alwaysCoop = @AlwaysCooperate;
-alwaysDefect = @AlwaysDefect;
-titForTat = @TitForTat;
-turnEvil = @TurnEvil;
-random = @Random;
-
-% Init of neural network
-hiddenLayerSize = 5;
-net = fitnet(hiddenLayerSize); % creates network
-net.inputs{1}.size = 10; % 5 turns*2 players
-net.trainParam.showWindow=0; % so that the pop up window doesn't show
-net = train(net,zeros(10),1:10); % doesn't have any sense, just to init the network
+alwaysCoop = AlwaysCooperate;
+alwaysDefect = AlwaysDefect;
+titForTat = TitForTat;
+turnEvil = TurnEvil;
+random = Random;
 
 %getwb(net) % 
 %view(net) % to check parameters of network
 
 strategiesForNN = {alwaysCoop, alwaysDefect, titForTat, turnEvil};
 
-ParticleSwarm(net, strategiesForNN) % returns best weights
+neural1 = NeuralNet(3,5);
 
-
-
+Train(neural1, strategiesForNN, 100) % 
 
 
 %%% Bottom code doesn't do anything meaningful
