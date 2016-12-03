@@ -1,13 +1,13 @@
 %% Simulation of population over sevreal iterations.
 clf
 clear
-figure()
+figure(1)
 %% Parameters
 %The number of iterations the complete simulation will run for.
-epochs=100;
+epochs=200;
 
-% The size of each sub population.
-subPop=100;
+% The initial magnitude of each sub population.
+popMag=1000;
 
 %Rounds to run the pd-game for.
 gameRounds=100;
@@ -31,20 +31,20 @@ iCTTBMF=@IllCountToThreeButMayForget;
 WWYD15=@WhatWillYouDo15;
 
 %Store in cell array.
-strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,WWYD15,iCTTBMF};
+strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,iCTTBMF,WWYD15};
 nrOfStrategies = length(strategiesHandles);
 
 %% Set up initial population.
 
-population=ones(nrOfStrategies,1)*subPop;
+population=ones(nrOfStrategies,1);
+population=population/norm(population).*popMag;
 
 % Set up the line animations.
 
 container=cell(nrOfStrategies,1);
-colorConst=1/nrOfStrategies*rand;
 
 for n=1:nrOfStrategies
-    container{n}=animatedline('Color',[colorConst*n colorConst*n colorConst*n]);
+    container{n}=animatedline('Color',[rand rand rand]);
 end
 
 %% CORE ALGO
@@ -57,6 +57,7 @@ for n=1:epochs
     %Reset the states.
     isEvil=0;
     threeCounter=0;
+    
     
     %Draw the pop dynamics.
     for s=1:nrOfStrategies
@@ -119,8 +120,31 @@ for n=1:epochs
     population=population.*fitness;
     
     %Renormalize to correct population size.
-    population=population./norm(population).*subPop;
+    population=population./norm(population).*popMag;
     
+    %If strategies falls below 1 individual, they die and are removed.
+    Gr=(population<20);
+    %If at least one species has fallen below 1 agent then remove it
+    if (find(Gr))
+        %Remove the strategy
+        strategiesHandles{Gr}=[];
+        
+        %Remove the line from the update list.
+        container{Gr}=[];
+        
+        %Reformat the cell arrays
+        strategiesHandles=strategiesHandles(~cellfun('isempty',strategiesHandles));
+         container=container(~cellfun('isempty',container));
+        
+        %Update the count.
+        nrOfStrategies=length(strategiesHandles);
+        
+        %Update the population variable
+        population(Gr)=0;
+        population=population(population~=0);
+        
+        sum(population)
+    end
 end
 
 
