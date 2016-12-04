@@ -1,4 +1,4 @@
-classdef Random < Strategy
+classdef Random < Strategy & handle
     %RANDOM Summary of this class goes here
     %   Detailed explanation goes here
     

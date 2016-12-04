@@ -1,4 +1,4 @@
-classdef TitForTat < Strategy
+classdef TitForTat < Strategy & handle
     %TITFORTA Summary of this class goes here
     %   Detailed explanation goes here
     

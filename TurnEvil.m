@@ -1,4 +1,4 @@
-classdef TurnEvil < Strategy
+classdef TurnEvil < Strategy & handle
     %TURNEVIL Summary of this class goes here
     %   Detailed explanation goes here
     

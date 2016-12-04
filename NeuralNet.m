@@ -1,4 +1,4 @@
-classdef NeuralNet < Strategy
+classdef NeuralNet < Strategy & handle
     %NEURALNET Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -40,7 +40,7 @@ classdef NeuralNet < Strategy
             obj.inputRounds = rounds;
             obj.hiddenLayerSize = layers(1);
             obj.net = fitnet(obj.hiddenLayerSize); % creates network
-            obj.net.inputs{1}.size = rounds*2; 
+            obj.net.inputs{1}.size = rounds*2;
             obj.net.trainParam.showWindow=0; % so that the pop up window doesn't show
             obj.net = train(obj.net,zeros(obj.inputRounds*2,5),1:5); % doesn't have any sense, just to init the network
             
@@ -77,13 +77,13 @@ classdef NeuralNet < Strategy
             
         end
         
-        function [ output_args ] = Train(obj, strategiesForNN, rounds )
+        function averages  = TrainNN(obj, strategiesForNN, rounds )
             % Optimises (searches for best weights) neural network from against strategies using PSO.
             % Returns best weights found
             
+            obj.swarmBestFitness = 0;
+            
             for it = 1:rounds
-                
-                fprintf('iteration: %d, avg fitness: %f, velocity factor %f\n ', it, mean(obj.fitness), obj.velocityFactor);
                 
                 % Evaluate all particles, update particle and swarm best.
                 for i = 1:obj.popSize
@@ -91,19 +91,15 @@ classdef NeuralNet < Strategy
                     obj.fitness(i) = EvaluateWeights(obj, obj.population(i,:), strategiesForNN);
                     
                     if obj.fitness(i) > obj.particleBestFitness(i)
-                        
                         obj.particleBest(i,:) = obj.population(i,:);
                         obj.particleBestFitness(i) = obj.fitness(i);
-                        
-                        if obj.fitness(i) > obj.swarmBestFitness
-                            
-                            obj.swarmBest = obj.population(i,:);
-                            obj.swarmBestFitness = obj.fitness(i);
-                            fprintf('New swarm best: %f\n', obj.swarmBestFitness);
-                        end
-                        
                     end
                     
+                    if obj.fitness(i) > obj.swarmBestFitness
+                        obj.swarmBest = obj.population(i,:);
+                        obj.swarmBestFitness = obj.fitness(i);
+                        fprintf('New swarm best: %f\n', obj.swarmBestFitness);
+                    end
                 end
                 
                 % Update directions for all particles
@@ -136,9 +132,11 @@ classdef NeuralNet < Strategy
                     obj.velocityFactor = obj.velocityFactor*obj.velocityFactorChange;
                 end
                 
+                fprintf('iteration: %d, avg fitness: %f, velocity factor %f\n ', it, mean(obj.fitness), obj.velocityFactor);
+                averages = obj.swarmBestFitness;
             end
             
-            output_args = obj.swarmBest;
+            obj.net = setwb(obj.net, obj.swarmBest); % set weights produced by particle swarm swarm
             
         end
         
@@ -175,6 +173,8 @@ classdef NeuralNet < Strategy
             fprintf('%f\n', payoff);
             
         end
+        
+        
         
     end
     

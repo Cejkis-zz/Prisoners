@@ -1,4 +1,4 @@
-classdef AlwaysDefect < Strategy
+classdef AlwaysDefect < Strategy & handle
     %ALWAYSCOOPERATE Summary of this class goes here
     %   Detailed explanation goes here
     

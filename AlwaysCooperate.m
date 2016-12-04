@@ -1,4 +1,4 @@
-classdef AlwaysCooperate < Strategy
+classdef AlwaysCooperate < Strategy & handle
     %ALWAYSCOOPERATE Summary of this class goes here
     %   Detailed explanation goes here
     
