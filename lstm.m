@@ -1,6 +1,6 @@
 
 function [] = lstm()
-    load = false;
+    load = true;
     file_name = 'S.mat';
     mu = 0.05;
     sigma = 0.01;
@@ -61,6 +61,42 @@ function [S, W_y] = train_network(S, W_y, y_tm1, c_tm1, T, xs, t, n, n_hidden, n
 end
 
 function dS = gradients(T, x, f_pass, b_pass, n_hidden, n_in)
+
+    dS = init_gradients(n_hidden, n_in);
+    for t = 1:T
+        % W
+        x_t = x(t,:)';
+        dS.dW.dW_z = dS.dW.dW_z + b_pass(:,1,t)*x_t';
+        dS.dW.dW_i = dS.dW.dW_i + b_pass(:,2,t)*x_t';
+        dS.dW.dW_f = dS.dW.dW_f + b_pass(:,3,t)*x_t';
+        dS.dW.dW_o = dS.dW.dW_o + b_pass(:,5,t)*x_t';
+        
+        % R
+        if t < T
+            y_t = f_pass(:,10,t);
+            dS.dR.dR_z = dS.dR.dR_z + b_pass(:,1,t+1)*y_t';
+            dS.dR.dR_i = dS.dR.dR_i + b_pass(:,2,t+1)*y_t';
+            dS.dR.dR_f = dS.dR.dR_f + b_pass(:,3,t+1)*y_t';
+            dS.dR.dR_o = dS.dR.dR_o + b_pass(:,5,t+1)*y_t';
+        end
+        
+        % P
+        c_t = b_pass(:,4,t);
+        if t < T
+            dS.dp.dp_i = dS.dp.dp_i + c_t.*b_pass(:,2,t+1);
+            dS.dp.dp_f = dS.dp.dp_f + c_t.*b_pass(:,3,t+1);
+        end
+        dS.dp.dp_o = dS.dp.dp_o + c_t.*b_pass(:,5,t); 
+    
+        % B
+        dS.db.db_z = dS.db.db_z + b_pass(:,1,t);
+        dS.db.db_i = dS.db.db_i + b_pass(:,2,t);
+        dS.db.db_f = dS.db.db_f + b_pass(:,3,t);
+        dS.db.db_o = dS.db.db_o + b_pass(:,5,t);
+    end
+end
+
+function dS = init_gradients(n_hidden, n_in)
     % W
     dW_z = zeros(n_hidden, n_in);
     dW_i = zeros(n_hidden, n_in);
@@ -80,37 +116,6 @@ function dS = gradients(T, x, f_pass, b_pass, n_hidden, n_in)
     db_i = zeros(n_hidden, 1);
     db_f = zeros(n_hidden, 1);
     db_o = zeros(n_hidden, 1);
-    for t = 1:T
-        % W
-        x_t = x(t,:)';
-        dW_z = dW_z + b_pass(:,1,t)*x_t';
-        dW_i = dW_i + b_pass(:,2,t)*x_t';
-        dW_f = dW_f + b_pass(:,3,t)*x_t';
-        dW_o = dW_o + b_pass(:,5,t)*x_t';
-        
-        % R
-        if t < T
-            y_t = f_pass(:,10,t);
-            dR_z = dR_z + b_pass(:,1,t+1)*y_t';
-            dR_i = dR_i + b_pass(:,2,t+1)*y_t';
-            dR_f = dR_f + b_pass(:,3,t+1)*y_t';
-            dR_o = dR_o + b_pass(:,5,t+1)*y_t';
-        end
-        
-        % P
-        c_t = b_pass(:,4,t);
-        if t < T
-            dp_i = dp_i + c_t.*b_pass(:,2,t+1);
-            dp_f = dp_f + c_t.*b_pass(:,3,t+1);
-        end
-        dp_o = dp_o + c_t.*b_pass(:,5,t); 
-    
-        % B
-        db_z = db_z + b_pass(:,1,t);
-        db_i = db_i + b_pass(:,2,t);
-        db_f = db_f + b_pass(:,3,t);
-        db_o = db_o + b_pass(:,5,t);
-    end
     
     dW = struct('dW_z', {dW_z}, 'dW_i', {dW_i}, 'dW_f', {dW_f}, 'dW_o', {dW_o});
     dR = struct('dR_z', {dR_z}, 'dR_i', {dR_i}, 'dR_f', {dR_f}, 'dR_o', {dR_o});

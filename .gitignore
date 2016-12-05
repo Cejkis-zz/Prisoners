@@ -20,6 +20,9 @@ $RECYCLE.BIN/
 # Matlab Autosaves
 *.asv
 
+# Matlab data-files
+*.mat
+
 # =========================
 # Operating System Files
 # =========================
