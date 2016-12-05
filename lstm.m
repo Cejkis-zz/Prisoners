@@ -4,7 +4,7 @@ function [] = lstm()
     file_name = 'S.mat';
     mu = 0.05;
     sigma = 0.01;
-    n_hidden = 4; n_in = 2; n_y = 1;
+    n_hidden = 2; n_in = 2; n_y = 1;
     n = 0.5;
     
     if load 
@@ -24,8 +24,8 @@ function [] = lstm()
           [0,0]];
     t  = 0;
     
-    [S, W_y] = train_network(S, W_y, zeros(n_hidden, 1), zeros(n_hidden, 1), T, xs, t, n, n_hidden, n_in);
-    predict(S, W_y, zeros(n_hidden, 1), zeros(n_hidden, 1), T, xs, n_hidden)
+    [S, W_y] = train_network(S, W_y, [0,0]', [0,0]', T, xs, t, n, n_hidden, n_in);
+    predict(S, W_y, [0,0]', [0,0]', T, xs, n_hidden)
     store_weights(S, 'S.mat');
     store_weights(W_y, 'W_y.mat');
 end
