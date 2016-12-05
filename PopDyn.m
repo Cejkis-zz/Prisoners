@@ -14,16 +14,13 @@ critPop=1;
 
 %Rounds to run the pd-game for.
 gameRounds=200;
+
 %How much of the pd rounds that will be cut of. Eg 0.80 would mean that 10%
 %at each end of the rounds will be cut of and averaged.
 exPer=0.80;
 
 %Setting for having a risk of mistakes happening.
 mistakeProb=0.05;
-
-%% State variables.
-global  threeCounter;
-threeCounter=0;
 
 %% Set up the involved strategies.
 
@@ -34,12 +31,13 @@ turnEvil = TurnEvil;
 random = Random;
 iCTTBMF=IllCountToThreeButMayForget;
 WWYD15=WhatWillYouDo15;
+
 %Set parameter values in the objects.
 WWYD15.horizon=15;
 WWYD15.tresh=0.25;
 
 %Store in cell array.
- strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,iCTTBMF,WWYD15};
+strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,iCTTBMF,WWYD15};
 nrOfStrategies = length(strategiesHandles);
 
 %% Set up initial population.
@@ -48,7 +46,6 @@ population=ones(nrOfStrategies,1);
 population=population/norm(population).*popMag;
 
 % Set up the line animations.
-
 container=cell(nrOfStrategies,1);
 
 for n=1:nrOfStrategies
