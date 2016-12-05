@@ -37,18 +37,30 @@ classdef NeuralNet < Strategy & handle
         function obj = NeuralNet(rounds, layers)
             
             obj = obj@Strategy();
-            obj.inputRounds = rounds;
-            obj.hiddenLayerSize = layers(1);
-            obj.net = fitnet(obj.hiddenLayerSize); % creates network
-            obj.net.inputs{1}.size = rounds*2;
-            obj.net.trainParam.showWindow=0; % so that the pop up window doesn't show
-            obj.net = train(obj.net,zeros(obj.inputRounds*2,5),1:5); % doesn't have any sense, just to init the network
+            
+            %obj.hiddenLayerSize = layers(1);
+            
+            if rounds == 'R' % recurrent
+                obj.inputRounds = 1;
+                obj.net = layrecnet(1, layers); % creates network
+                obj.net.inputs{1}.size = 2;
+                obj.net.trainParam.showWindow=0; % so that the pop up window doesn't show
+                obj.net = train(obj.net,zeros(2,5),1:5); % doesn't have any sense, just to init the network
+            else
+                obj.inputRounds = rounds;
+                obj.net = fitnet(layers); % creates network
+                obj.net.inputs{1}.size = rounds*2;
+                obj.net.trainParam.showWindow=0; % so that the pop up window doesn't show
+                obj.net = train(obj.net,zeros(obj.inputRounds*2,5),1:5); % doesn't have any sense, just to init the network
+            end
+            
+            
             
             obj.xDiff = obj.xMax - obj.xMin;
             
             obj.nrOfVariables = length(getwb(obj.net));
             
-            obj.population = rand(obj.popSize,obj.nrOfVariables)*obj.xDiff +obj.xMin; % each row = one particle = weights for
+            obj.population = rand(obj.popSize,obj.nrOfVariables)*obj.xDiff + obj.xMin; % each row = one particle = weights for
             obj.velocity = (rand(obj.popSize,obj.nrOfVariables)*obj.xDiff - obj.xDiff/2);
             obj.fitness = zeros(obj.popSize,1);
             
@@ -62,7 +74,7 @@ classdef NeuralNet < Strategy & handle
         function out = Action(obj, history)
             
             if size(history, 1) < obj.inputRounds
-                out = rand-0.5; % the first 5 choices are random
+                out = rand - 0.5; % the first choices are random
             else
                 input = history([end - obj.inputRounds + 1 :end],:);
                 networkInput = reshape(input,[1,obj.inputRounds*2])';
@@ -173,8 +185,6 @@ classdef NeuralNet < Strategy & handle
             fprintf('%f\n', payoff);
             
         end
-        
-        
         
     end
     
