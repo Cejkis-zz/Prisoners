@@ -44,13 +44,13 @@ classdef LSTM_wrapper <  Strategy
                   [0,0];
                   [1,1];
                   [0,0]];
-            target = 0;
+            target = [1, 1];
 
             c_0 = zeros(obj.n_hidden, 1);
             y_0 = zeros(obj.n_hidden, 1);
             x_0 = zeros(1, 2);
             obj.predict_next(y_0, c_0, [x_0]);
-            obj.train_network(y_0, c_0, T, xs, target);
+            obj.train_network(y_0, c_0, xs, target);
         end
         
         function out = Action(obj, history)
@@ -58,21 +58,23 @@ classdef LSTM_wrapper <  Strategy
         end
          
         function [prediction, y_t, c_t] = predict_next(obj, y_tm1, c_tm1, xs)
-            f_pass = obj.lstm_net.lstm_forward_pass(xs, 1, y_tm1, c_tm1);
+            f_pass = obj.lstm_net.lstm_forward_pass(xs, y_tm1, c_tm1);
             c_t = f_pass(:, 7, 1);
             y_t = f_pass(:, 10, 1);
             prediction = obj.output_activation(y_t);
         end
         
-        function [S, W_y] = train_network(obj, y_tm1, c_tm1, T, xs, target)
+        function train_network(obj, y_tm1, c_tm1, xs, target)
 
             % Forward
-            f_pass = obj.lstm_net.lstm_forward_pass(xs, T, y_tm1, c_tm1);
+            dim = size(xs);
+            T = dim(1);
+            f_pass = obj.lstm_net.lstm_forward_pass(xs, y_tm1, c_tm1);
             y_t = f_pass(:, 10, T);
             output = obj.output_activation(y_t); % linear + sigmoid activation
 
             % Loss function
-            Loss = (target - output);
+            Loss = (target(2) - output);
 
             % Output layer
             d_out = - Loss*obj.d_output_activation(output);
@@ -80,7 +82,9 @@ classdef LSTM_wrapper <  Strategy
             obj.W_y = obj.W_y - obj.n * dW_y;
 
             % Backward
-            obj.lstm_net.bptt(d_out, T, xs, f_pass);
+            obj.lstm_net.bptt(d_out, xs, f_pass);
+            
+            % Save lstm and output layer
             obj.lstm_net.save_net('lstm.mat');
             save('wrapper.mat');
         end

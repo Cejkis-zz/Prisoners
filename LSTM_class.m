@@ -14,7 +14,9 @@ classdef LSTM_class
         end
         
         % Back Propagation Thrpugh Time
-        function bptt(obj, d_out, T, xs, f_pass)
+        function bptt(obj, d_out, xs, f_pass)
+            dim = size(xs);
+            T = dim(1);
             b_pass = obj.lstm_backward_pass(d_out, T, f_pass);
             dS = obj.gradients(T, xs, f_pass, b_pass);
             obj.update_weights(dS);
@@ -64,7 +66,9 @@ classdef LSTM_class
             D = [dz_t, di_t, df_t, dc_t, do_t, dy_t];
         end
 
-        function f_pass = lstm_forward_pass(obj, xs, T, y_0, c_0)
+        function f_pass = lstm_forward_pass(obj, xs, y_0, c_0)
+            dim = size(xs);
+            T = dim(1);
             f_pass = zeros(obj.n_hidden, 10, T);
 
             y_t = y_0; c_t = c_0;
