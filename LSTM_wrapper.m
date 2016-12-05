@@ -12,11 +12,11 @@ classdef LSTM_wrapper <  Strategy
         n = 0.5;
         
         % Initialize Weights
-        mu = 0.05;
+        mu = 0.0;
         sigma = 0.01;
         
         % Load/Store Weights
-        load = true;
+        load = false;
         
         % Weights
         lstm_net; % = LSTM.init_weights(obj.mu, obj.sigma, n_hidden, n_in);
@@ -27,17 +27,18 @@ classdef LSTM_wrapper <  Strategy
         % Constructor
         function obj = LSTM_wrapper()
             obj.W_y = normrnd(obj.mu, obj.sigma, [obj.n_y, obj.n_hidden]);
-            save('wrapper.mat');
+            %save('wrapper.mat');
             obj.lstm_net = LSTM_class(obj.mu, obj.sigma, obj.n, obj.n_hidden, obj.n_in);
-            obj.lstm_net.save_net('lstm.mat');
+            %obj.lstm_net.save_net('lstm.mat');
             
             if obj.load 
                 obj.lstm_net.load_net('lstm.mat');
                 wrapper = load('wrapper.mat');
                 obj.W_y = wrapper.obj.W_y;
             end
-            
-            T = 6;
+        end
+        
+        function out = Action(obj, history)
             xs = [[1,1];
                   [0,0];
                   [1,1];
@@ -49,12 +50,9 @@ classdef LSTM_wrapper <  Strategy
             c_0 = zeros(obj.n_hidden, 1);
             y_0 = zeros(obj.n_hidden, 1);
             x_0 = zeros(1, 2);
-            obj.predict_next(y_0, c_0, [x_0]);
-            obj.train_network(y_0, c_0, xs, target);
-        end
-        
-        function out = Action(obj, history)
             
+            obj.train_network(y_0, c_0, xs, target);
+            obj.predict_next(y_0, c_0, [x_0])
         end
          
         function [prediction, y_t, c_t] = predict_next(obj, y_tm1, c_tm1, xs)
