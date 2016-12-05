@@ -61,7 +61,7 @@ classdef LSTM_wrapper <  Strategy
             f_pass = obj.lstm_net.lstm_forward_pass(xs, y_tm1, c_tm1);
             c_t = f_pass(:, 7, 1);
             y_t = f_pass(:, 10, 1);
-            prediction = obj.output_activation(y_t);
+            prediction = round(obj.output_activation(y_t));
         end
         
         function train_network(obj, y_tm1, c_tm1, xs, target)
