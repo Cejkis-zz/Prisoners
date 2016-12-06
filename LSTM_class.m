@@ -4,6 +4,8 @@ classdef LSTM_class
         n_in;
         n_hidden;
         S;
+        y_0;
+        c_0;
     end
     methods
         function obj = LSTM_class(mean, var, n, n_in, n_hidden)
@@ -11,6 +13,8 @@ classdef LSTM_class
             obj.n_in = n_in;
             obj.n_hidden = n_hidden;
             obj.S = obj.init_weights(mean, var);
+            obj.y_0 = zeros(n_hidden, 1);
+            obj.c_0 = zeros(n_hidden, 1);
         end
         
         % Back Propagation Thrpugh Time
@@ -66,12 +70,12 @@ classdef LSTM_class
             D = [dz_t, di_t, df_t, dc_t, do_t, dy_t];
         end
 
-        function f_pass = lstm_forward_pass(obj, xs, y_0, c_0)
+        function f_pass = lstm_forward_pass(obj, xs)
             dim = size(xs);
             T = dim(1);
             f_pass = zeros(obj.n_hidden, 10, T);
 
-            y_t = y_0; c_t = c_0;
+            y_t = obj.y_0; c_t = obj.c_0;
             for t = 1:T
                 x_t = xs(t,:)';
                 F = obj.lstm_forward_step(x_t, y_t, c_t);
@@ -247,6 +251,8 @@ classdef LSTM_class
             net = load(file_name);
             
             obj.S = net.obj.S;
+            obj.y_0 = net.obj.y_0;
+            obj.c_0 = net.obj.c_0;
             obj.n = net.obj.n;
             obj.n_in = net.obj.n_in;
             obj.n_hidden = net.obj.n_hidden;

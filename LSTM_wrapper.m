@@ -9,7 +9,7 @@ classdef LSTM_wrapper <  Strategy
         n_y = 1;
         
         % learning rate
-        n = 0.5;
+        n = 0.1;
         
         % Initialize Weights
         mu = 0.0;
@@ -19,17 +19,21 @@ classdef LSTM_wrapper <  Strategy
         load = false;
         
         % Weights
-        lstm_net; % = LSTM.init_weights(obj.mu, obj.sigma, n_hidden, n_in);
-        W_y; % = normrnd(mu,sigma,[n_y, n_hidden]);
+        lstm_net; % LSTM
+        W_y;  % Output layer
+        
+        % Initial strategy
+        initial_strategy = TwoInARow();
+        
+        % Memory size
+        memory = 20;
     end
     
     methods
         % Constructor
         function obj = LSTM_wrapper()
             obj.W_y = normrnd(obj.mu, obj.sigma, [obj.n_y, obj.n_hidden]);
-            %save('wrapper.mat');
             obj.lstm_net = LSTM_class(obj.mu, obj.sigma, obj.n, obj.n_hidden, obj.n_in);
-            %obj.lstm_net.save_net('lstm.mat');
             
             if obj.load 
                 obj.lstm_net.load_net('lstm.mat');
@@ -39,35 +43,40 @@ classdef LSTM_wrapper <  Strategy
         end
         
         function out = Action(obj, history)
-            xs = [[1,1];
-                  [0,0];
-                  [1,1];
-                  [0,0];
-                  [1,1];
-                  [0,0]];
-            target = [1, 1];
+            dim = size(history);
+            T = dim(1);
+            if T < 1 + obj.memory
+                out = obj.initial_strategy.Action(history);
+            else
+                ts = T-obj.memory:T-1;
+                xs = history(ts, :);
+                target = history(T, :);
 
-            c_0 = zeros(obj.n_hidden, 1);
-            y_0 = zeros(obj.n_hidden, 1);
-            x_0 = zeros(1, 2);
-            
-            obj.train_network(y_0, c_0, xs, target);
-            obj.predict_next(y_0, c_0, [x_0])
+                obj.train_network(xs, target);
+                [prediction, output] = obj.predict_next(xs);
+                
+                ready = T > 20 + obj.memory;
+                if ready
+                    out = output;
+                else
+                    out = obj.initial_strategy.Action(history);
+                end
+            end
         end
          
-        function [prediction, y_t, c_t] = predict_next(obj, y_tm1, c_tm1, xs)
-            f_pass = obj.lstm_net.lstm_forward_pass(xs, y_tm1, c_tm1);
-            c_t = f_pass(:, 7, 1);
+        function [prediction, output] = predict_next(obj, xs)
+            f_pass = obj.lstm_net.lstm_forward_pass(xs);
             y_t = f_pass(:, 10, 1);
-            prediction = round(obj.output_activation(y_t));
+            output = obj.output_activation(y_t);
+            prediction = round(output);
         end
         
-        function train_network(obj, y_tm1, c_tm1, xs, target)
+        function train_network(obj, xs, target)
 
             % Forward
             dim = size(xs);
             T = dim(1);
-            f_pass = obj.lstm_net.lstm_forward_pass(xs, y_tm1, c_tm1);
+            f_pass = obj.lstm_net.lstm_forward_pass(xs);
             y_t = f_pass(:, 10, T);
             output = obj.output_activation(y_t); % linear + sigmoid activation
 
