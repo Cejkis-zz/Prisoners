@@ -18,12 +18,15 @@ classdef LSTM_class
         end
         
         % Back Propagation Thrpugh Time
-        function bptt(obj, d_out, xs, f_pass)
-            dim = size(xs);
-            T = dim(1);
+        function obj = bptt(obj, d_out, xs, f_pass)
+            T = size(xs, 1);
             b_pass = obj.lstm_backward_pass(d_out, T, f_pass);
             dS = obj.gradients(T, xs, f_pass, b_pass);
-            obj.update_weights(dS);
+            dS.dW.dW_z;
+            dS.dR.dR_z;
+            dS.dp.dp_i;
+            dS.db.db_z;
+            obj = obj.update_weights(dS);
         end
         
         function b_pass = lstm_backward_pass(obj, d_out, T, f_pass)
@@ -39,7 +42,7 @@ classdef LSTM_class
 
                 if t < T
                     f_tp1 = f_pass(:,6,t+1);
-                    d_out = zeros(obj.n_hidden, 1);
+                    %d_out = zeros(obj.n_hidden, 1);
                 end
 
                 if t > 1 
@@ -48,7 +51,7 @@ classdef LSTM_class
                     c_tm1 = zeros(obj.n_hidden, 1);
                 end
 
-                D = obj.lstm_backward_step(d_out, f_tp1, c_tm1, F, D);
+                D = obj.lstm_backward_step(d_out(:,t), f_tp1, c_tm1, F, D);
                 b_pass(:,:,t) = D; 
             end
         end
@@ -96,7 +99,7 @@ classdef LSTM_class
             o_t_ = obj.S.W.W_o * x_t + obj.S.R.R_o * y_tm1 + obj.S.p.p_o .* c_t + obj.S.b.b_o;
             o_t = obj.sigmoid(o_t_); % output gate
             y_t = obj.h(c_t) .* o_t; % block output gate
-
+            
             F = [z_t_, z_t, i_t_, i_t, f_t_, f_t, c_t, o_t_, o_t, y_t];
         end
 
@@ -165,7 +168,7 @@ classdef LSTM_class
             dS = struct('dW', {dW}, 'dR', {dR}, 'dp', {dp}, 'db', {db});
         end
 
-        function update_weights(obj, dS)
+        function obj = update_weights(obj, dS)
 
             obj.S.W.W_z = obj.S.W.W_z - obj.n * dS.dW.dW_z;
             obj.S.W.W_i = obj.S.W.W_i - obj.n * dS.dW.dW_i;
@@ -248,14 +251,15 @@ classdef LSTM_class
         end
 
         function net = load_net(obj, file_name)
-            net = load(file_name);
+            file = load(file_name);
+            net = file.obj;
             
-            obj.S = net.obj.S;
-            obj.y_0 = net.obj.y_0;
-            obj.c_0 = net.obj.c_0;
-            obj.n = net.obj.n;
-            obj.n_in = net.obj.n_in;
-            obj.n_hidden = net.obj.n_hidden;
+            obj.S = net.S;
+            obj.y_0 = net.y_0;
+            obj.c_0 = net.c_0;
+            obj.n = net.n;
+            obj.n_in = net.n_in;
+            obj.n_hidden = net.n_hidden;
         end
 
         %% Activation functions
