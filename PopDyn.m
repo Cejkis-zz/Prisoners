@@ -4,7 +4,7 @@ clear
 figure(1)
 %% Parameters
 %The number of iterations the complete simulation will run for.
-epochs=250;
+epochs=500;
 
 % The initial magnitude of each sub population.
 popMag=1000;
@@ -17,10 +17,10 @@ gameRounds=200;
 
 %How much of the pd rounds that will be cut of. Eg 0.80 would mean that 10%
 %at each end of the rounds will be cut of and averaged.
-exPer=0.80;
+exPer=0.90;
 
 %Setting for having a risk of mistakes happening.
-mistakeProb=0.05;
+mistakeProb=0.03;
 
 %% Set up the involved strategies.
 
@@ -30,14 +30,15 @@ titForTat = TitForTat;
 turnEvil = TurnEvil;
 random = Random;
 iCTTBMF=IllCountToThreeButMayForget;
-WWYD15=WhatWillYouDo15;
+wWYD15=WhatWillYouDo15;
+twoInARow=TwoInARow;
 
 %Set parameter values in the objects.
-WWYD15.horizon=15;
-WWYD15.tresh=0.25;
+wWYD15.horizon=15;
+wWYD15.tresh=0.25;
 
 %Store in cell array.
-strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,iCTTBMF,WWYD15};
+strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,iCTTBMF,wWYD15,twoInARow};
 nrOfStrategies = length(strategiesHandles);
 
 %% Set up initial population.
@@ -65,7 +66,6 @@ endsave=gameRounds-startSave;
 for n=1:epochs
     
     %Reset the states.
-    isEvil=0;
     threeCounter=0;
     
     %Draw the pop dynamics.
@@ -73,9 +73,6 @@ for n=1:epochs
         addpoints(container{s},n,population(s));
     end
     drawnow;
-    %pause(0.1);
-    %plot(repmat(n,size(population))',population')
-    %scatter(repmat(n,size(population)),population);
 
     results = zeros(nrOfStrategies);
     
@@ -127,6 +124,12 @@ for n=1:epochs
     %Calculate current epoch average score for all strategies.
     avgScorePerStrat=sum(results,2)/size(results,2);
     
+    %Calculate current epoch average score for all strategies, taking the
+    %size of the population of the opposing strategy into account.
+    %popScale=repmat(population'./sum(population),[size(results,1) 1]);
+    %scaledResults=results.*popScale;
+    %avgScorePerStrat=sum(scaledResults,2)/size(results,2);
+    
     %Total average for the epoch.
     avgScoreForEpoch=mean(avgScorePerStrat);
     
@@ -163,6 +166,14 @@ for n=1:epochs
         population=population(population~=0);
 
     end
+    if(numel(population)==1)
+        %Last man standing. Terminate simulation.
+        break;
+    end
+    
+    
+    %Round to an integer amount of agents.
+    population=round(population);
 end
 
 %Print the strategies still alive. And their share of the population.
