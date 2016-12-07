@@ -8,6 +8,11 @@ classdef IllCountToThreeButMayForget< Strategy
     
     methods
         
+        %Reset the state.
+        function []=resetState(obj)
+            obj.threeCounter=0;
+        end
+        
         function [ out ] = Action(obj, history )
             %cooperate initially.
             if size(history,1) ==0

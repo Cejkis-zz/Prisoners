@@ -68,7 +68,7 @@ endsave=gameRounds-startSave;
 for n=1:epochs
     
     %Reset the states.
-    iCTTBMF.threeCounter=0;
+    iCTTBMF.resetState();
     
     %Draw the pop dynamics.
     for s=1:nrOfStrategies
