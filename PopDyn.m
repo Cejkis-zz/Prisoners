@@ -4,7 +4,7 @@ clear
 figure(1)
 %% Parameters
 %The number of iterations the complete simulation will run for.
-epochs=500;
+epochs=300;
 
 % The initial magnitude of the population vector.
 popMag=1000;
@@ -20,11 +20,11 @@ gameRounds=200;
 exPer=0.90;
 
 %Setting for having a risk of mistakes happening.
-mistakeProb=0.03;
+mistakeProb=0;
 
 %Severity scale. Used to either suppress or increase the harshness of the
 %dynamics. Default is 1;
-sevScale=0.75;
+sevScale=1;
 
 %% Set up the involved strategies.
 
@@ -59,8 +59,10 @@ for n=1:nrOfStrategies
     container{n}=aline;
 end
 
-legend('Location','eastoutside')
-legend('show')
+legend('Location','eastoutside');
+leg=legend('show');
+set(leg,'FontSize',10);
+
 
 %% CORE ALGO
 startSave=floor(gameRounds*(1-exPer)/2);
@@ -70,48 +72,26 @@ endsave=gameRounds-startSave;
 for n=1:epochs
     
     %Reset the states.
-    threeCounter=0;
+    iCTTBMF.threeCounter=0;
     
     %Draw the pop dynamics.
     for s=1:nrOfStrategies
         addpoints(container{s},n,population(s));
     end
     drawnow;
-
+    
     results = zeros(nrOfStrategies);
     
     %Play all strategies against eachother.
     for i = 1:nrOfStrategies
-        for j = nrOfStrategies:-1:(i+1)
+        for j = nrOfStrategies:-1:(i) %+1 if you dont want to play yoyrself.
             
-            %Reset history and util.
-            history = zeros(gameRounds,2);
-            utilities = zeros(gameRounds,2);
-            h1=strategiesHandles{i};
-            h2=strategiesHandles{j};
+            %Extract the agents.
+            a1=strategiesHandles{i};
+            a2=strategiesHandles{j};
             
             %Play the PD-game.
-            for r = 1: gameRounds
-                
-                % get the move of each player.
-                p1 = h1.Action(history(1:r-1,:));
-                %Change columns of the history for the opponent.
-                p2 = h2.Action([history(1:r-1,2),history(1:r-1,1)]);
-                
-                %A mistake might occur. This causes choice to "flip".
-                if(rand<mistakeProb)
-                    p1=~p1;
-                end
-                if(rand<mistakeProb)
-                    p2=~p2;
-                end
-                
-                %Update history matrix.
-                history(r,:) = [p1 p2];
-                
-                %Compute utilities for both players.
-                utilities(r,:) = PrisonersRound(p1, p2);
-            end
+            utilities=pdGame(a1,a2,gameRounds,mistakeProb);
             
             %Extract only the relevant parts of the utility series.
             utilities=utilities(startSave:endsave,:);
@@ -146,7 +126,7 @@ for n=1:epochs
     %Set the change in population depending on the fitness.
     population=population.*fitness;
     
-    %Renormalize to correct population size.
+    %Renormalize to correct population magnitude.
     population=population./norm(population).*popMag;
     
     %If strategies falls below the critical point, they die and are removed.
@@ -154,24 +134,24 @@ for n=1:epochs
     idx=find(Gr);
     if (idx)
         for p=1:length(idx)
-        %Remove the strategy
-        strategiesHandles{idx(p)}=[];
-        
-        %Remove the line from the update list.
-        container{idx(p)}=[];
+            %Remove the strategy/strategies.
+            strategiesHandles{idx(p)}=[];
+            
+            %Remove the line(s) from the update list.
+            container{idx(p)}=[];
         end
         
-        %Reformat the cell arrays
+        %Reformat the cell arrays.
         strategiesHandles=strategiesHandles(~cellfun('isempty',strategiesHandles));
         container=container(~cellfun('isempty',container));
         
         %Update the count.
         nrOfStrategies=length(strategiesHandles);
         
-        %Update the population variable
+        %Update the population variable.
         population(Gr)=0;
         population=population(population~=0);
-
+        
     end
     if(numel(population)==1)
         %Last species standing. Terminate simulation.
