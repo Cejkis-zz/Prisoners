@@ -6,21 +6,25 @@ figure(1)
 %The number of iterations the complete simulation will run for.
 epochs=500;
 
-% The initial magnitude of each sub population.
+% The initial magnitude of the population vector.
 popMag=1000;
 
-%The lowest possible population before dying out.
+%The lowest possible sub-population before dying out.
 critPop=1;
 
 %Rounds to run the pd-game for.
 gameRounds=200;
 
 %How much of the pd rounds that will be cut of. Eg 0.80 would mean that 10%
-%at each end of the rounds will be cut of and averaged.
+%at the beginning and end of the rounds will be discarded in the average.
 exPer=0.90;
 
 %Setting for having a risk of mistakes happening.
 mistakeProb=0.03;
+
+%Severity scale. Used to either suppress or increase the harshness of the
+%dynamics. Default is 1;
+sevScale=0.75;
 
 %% Set up the involved strategies.
 
@@ -136,6 +140,9 @@ for n=1:epochs
     %Get the percentage of the average each strategy reached.
     fitness=avgScorePerStrat./avgScoreForEpoch;
     
+    %Apply the severity scale.
+    fitness=ones(size(fitness))-(ones(size(fitness))-fitness)*sevScale;
+    
     %Set the change in population depending on the fitness.
     population=population.*fitness;
     
@@ -167,10 +174,9 @@ for n=1:epochs
 
     end
     if(numel(population)==1)
-        %Last man standing. Terminate simulation.
+        %Last species standing. Terminate simulation.
         break;
     end
-    
     
     %Round to an integer amount of agents.
     population=round(population);
