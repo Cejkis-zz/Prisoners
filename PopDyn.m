@@ -34,12 +34,8 @@ titForTat = TitForTat;
 turnEvil = TurnEvil;
 random = Random;
 iCTTBMF=IllCountToThreeButMayForget;
-wWYD15=WhatWillYouDo15;
+wWYD15=WhatWillYouDoHT(15,0.25);
 twoInARow=TwoInARow;
-
-%Set parameter values in the objects.
-wWYD15.horizon=15;
-wWYD15.tresh=0.25;
 
 %Store in cell array.
 strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,iCTTBMF,wWYD15,twoInARow};
