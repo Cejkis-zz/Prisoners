@@ -11,6 +11,12 @@ classdef RNNStrategy < Strategy
         memory_size = 4;
         % nr. of future steps
         future_steps = 4;
+        % learning time and actions played
+        learning_time = 20000;
+        nr_of_actions = 0;
+        noise_ratio = 0;
+        noise = Random();
+        
     end
     
     methods
@@ -24,6 +30,7 @@ classdef RNNStrategy < Strategy
         end
         
         function out = Action(obj, history)
+            obj.nr_of_actions = obj.nr_of_actions + 1;
             T = size(history, 1);
             if T > obj.memory_size
                 ts1 = (T-obj.memory_size:T-1);
@@ -31,15 +38,32 @@ classdef RNNStrategy < Strategy
             else
                 ts1 = 1:T; ts2 = 1:T;
             end
-            obj.rnn = obj.rnn.sgd_step(history(ts1,:), history(ts2,2));
-            save('rnn.mat');
+            
+            if T > obj.memory_size
+                if T == obj.learning_time
+                    save('rnn.mat');
+                elseif T < obj.learning_time
+                    obj.rnn = obj.rnn.sgd_step(history(ts1,:), history(ts2,2));
+                end
+            end
 
-            %out = obj.rnn.predictFuture(history);
-            if obj.predictFuture( history(ts2,:), obj.future_steps, 0) > ...
-               obj.predictFuture( history(ts2,:), obj.future_steps, 1)
-                out = 0;
+            %out = obj.rnn.predict(history(ts2,:));
+            if T == 0
+                out = 1; % initially Cooperate
+            elseif (obj.learning_time > obj.nr_of_actions && mod(obj.nr_of_actions, obj.noise_ratio) == 0) %T < obj.init_time
+                out = obj.noise.Action(history(ts2,:));
             else
-                out = 1;
+                out = obj.rnn.predict(history(ts2,:)); %obj.policy(history(ts2,:)); %obj.rnn.predict(history(ts2,:)); %
+            end
+            
+        end
+        
+        function out = policy(obj, history)
+            if obj.predictFuture(history, obj.future_steps, 0) > ...
+               obj.predictFuture(history, obj.future_steps, 1)
+                    out = 0;
+            else
+                    out = 1;
             end
         end
         
