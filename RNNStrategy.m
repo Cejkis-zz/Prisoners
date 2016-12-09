@@ -11,12 +11,20 @@ classdef RNNStrategy < Strategy
         memory_size = 4;
         % nr. of future steps
         future_steps = 4;
+        
         % learning time and actions played
-        learning_time = 20000;
+        learning_rounds = 2000;
+        learning_rate = 2.0;
+        half_time = 50;
         nr_of_actions = 0;
         noise_ratio = 0;
         noise = Random();
         
+        % pre-training options
+        pre_training = false;
+        strategies = {AlwaysCooperate(), AlwaysDefect(), TitForTat(), ... 
+                      TurnEvil(), Random(), IllCountToThreeButMayForget(), ... 
+                      WhatWillYouDoHT(15,0.25), TwoInARow()};
     end
     
     methods
@@ -26,6 +34,9 @@ classdef RNNStrategy < Strategy
                 obj.rnn = file.obj.rnn;
             else
                 obj.rnn = RNN();
+                if obj.pre_training
+                   obj.pre_train(); 
+                end
             end
         end
         
@@ -40,22 +51,28 @@ classdef RNNStrategy < Strategy
             end
             
             if T > obj.memory_size
-                if T == obj.learning_time
+                if T == obj.learning_rounds
                     save('rnn.mat');
-                elseif T < obj.learning_time
-                    obj.rnn = obj.rnn.sgd_step(history(ts1,:), history(ts2,2));
+                elseif T < obj.learning_rounds
+                    obj.rnn = obj.rnn.sgd_step(history(ts1,:), history(ts2,2), obj.learning_rate);
+                    if mod(obj.nr_of_actions, obj.half_time) == 0
+                        obj.learning_rate = obj.learning_rate ./ 2;
+                    end
                 end
             end
 
             %out = obj.rnn.predict(history(ts2,:));
             if T == 0
                 out = 1; % initially Cooperate
-            elseif (obj.learning_time > obj.nr_of_actions && mod(obj.nr_of_actions, obj.noise_ratio) == 0) %T < obj.init_time
+            elseif (obj.learning_rounds > obj.nr_of_actions && mod(obj.nr_of_actions, obj.noise_ratio) == 0) %T < obj.init_time
                 out = obj.noise.Action(history(ts2,:));
             else
-                out = obj.rnn.predict(history(ts2,:)); %obj.policy(history(ts2,:)); %obj.rnn.predict(history(ts2,:)); %
+                if true
+                    out = obj.rnn.predict(history(ts2,:));
+                else
+                    out = obj.policy(history(ts2,:)); %obj.rnn.predict(history(ts2,:)); %
+                end
             end
-            
         end
         
         function out = policy(obj, history)
@@ -88,6 +105,10 @@ classdef RNNStrategy < Strategy
         function award = payoff(obj, me, opponent)
             p_matrix = [[1, 5];[0, 3]];
             award = p_matrix(me+1, opponent+1);
+        end
+        
+        function pre_train()
+            
         end
     end 
 end
