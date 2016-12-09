@@ -20,7 +20,7 @@ gameRounds=300;
 exPer=0.90;
 
 %Setting for having a risk of mistakes happening.
-mistakeProb=0.15;
+mistakeProb=0.035;
 
 %Severity scale. Used to either suppress or increase the harshness of the
 %dynamics. Default is 1;
@@ -41,8 +41,8 @@ rNNNet=RNNStrategy();
 %swarmNet=NeuralNet(4,[3 2],1);
 
 %Store in cell array.
-strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,iCTTBMF,wWYDHT,twoInARow,rNNNet};
-% strategiesHandles = { alwaysCoop,titForTat,rNNNet};
+strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,iCTTBMF,wWYDHT,twoInARow};
+%  strategiesHandles = { alwaysCoop,titForTat,rNNNet};
 nrOfStrategies = length(strategiesHandles);
 
 %% Set up initial population.
@@ -114,7 +114,11 @@ for n=1:epochs
     %avgScorePerStrat=sum(scaledResults,2)/size(results,2);
     
     %Total average for the epoch.
-    avgScoreForEpoch=mean(avgScorePerStrat);
+    %avgScoreForEpoch=mean(avgScorePerStrat);
+    
+    %Weighted average for the epoch.
+    popScale=population./sum(population);
+    avgScoreForEpoch=sum(avgScorePerStrat.*popScale)./length(popScale);
     
     %Get the percentage of the average each strategy reached.
     fitness=avgScorePerStrat./avgScoreForEpoch;
