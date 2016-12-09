@@ -4,7 +4,7 @@ clear
 figure(1)
 %% Parameters
 %The number of iterations the complete simulation will run for.
-epochs=100;
+epochs=500;
 
 % The initial magnitude of the population vector.
 popMag=1000;
@@ -13,18 +13,18 @@ popMag=1000;
 critPop=1;
 
 %Rounds to run the pd-game for.
-gameRounds=100;
+gameRounds=300;
 
 %How much of the pd rounds that will be cut of. Eg 0.80 would mean that 10%
 %at the beginning and end of the rounds will be discarded in the average.
 exPer=0.90;
 
 %Setting for having a risk of mistakes happening.
-mistakeProb=0.035;
+mistakeProb=0.15;
 
 %Severity scale. Used to either suppress or increase the harshness of the
 %dynamics. Default is 1;
-sevScale=1;
+sevScale=1.0;
 
 %% Set up the involved strategies.
 
@@ -36,12 +36,13 @@ random = Random;
 iCTTBMF=IllCountToThreeButMayForget;
 wWYDHT=WhatWillYouDoHT(15,0.25);
 twoInARow=TwoInARow;
+
 rNNNet=RNNStrategy();
 %swarmNet=NeuralNet(4,[3 2],1);
 
-
 %Store in cell array.
 strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,iCTTBMF,wWYDHT,twoInARow,rNNNet};
+% strategiesHandles = { alwaysCoop,titForTat,rNNNet};
 nrOfStrategies = length(strategiesHandles);
 
 %% Set up initial population.
