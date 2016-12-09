@@ -7,7 +7,7 @@ classdef Random < Strategy & handle
     
     methods
         
-        function [ out ] = Action( obj, history )
+        function [ out ] = Action( obj, history, ~ )
             
             if rand > 0.5
                 out = 1;

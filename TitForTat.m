@@ -6,7 +6,7 @@ classdef TitForTat < Strategy & handle
     end
     
     methods
-        function [ out ] = Action( obj,history )
+        function [ out ] = Action( obj,history,~ )
             if size(history,1) ==0
                 out = 1;
                 return;
@@ -17,4 +17,3 @@ classdef TitForTat < Strategy & handle
     end
     
 end
-

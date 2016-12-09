@@ -8,7 +8,7 @@ classdef TurnEvil < Strategy & handle
     
     methods
         
-        function [ out ] = Action( obj, history )
+        function [ out ] = Action( obj, history, ~ )
             % cooperates, but from one random point defects all the time
             
             if size(history,1) ==0

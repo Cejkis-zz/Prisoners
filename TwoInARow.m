@@ -6,7 +6,7 @@ classdef TwoInARow < Strategy & handle
     end
     
     methods
-        function [ out ] = Action( obj,history )
+        function [ out ] = Action( obj,history, ~ )
             if size(history,1) < 2
                 out = 1;
                 return;
@@ -25,4 +25,3 @@ classdef TwoInARow < Strategy & handle
     end
     
 end
-

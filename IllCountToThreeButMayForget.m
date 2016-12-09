@@ -13,7 +13,7 @@ classdef IllCountToThreeButMayForget< Strategy
             obj.threeCounter=0;
         end
         
-        function [ out ] = Action(obj, history )
+        function [ out ] = Action(obj, history, ~ )
             %cooperate initially.
             if size(history,1) ==0
                 out = 1;
@@ -45,6 +45,3 @@ classdef IllCountToThreeButMayForget< Strategy
         
     end
 end
-
-
-

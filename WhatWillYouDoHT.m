@@ -16,7 +16,7 @@ classdef WhatWillYouDoHT < Strategy
             obj.tresh=T;
         end
         
-        function [ out ] = Action(obj, history )
+        function [ out ] = Action(obj, history, ~ )
             if (length(history)<obj.horizon)
                 %Cooperate if the history is not long enough.
                 out =1;

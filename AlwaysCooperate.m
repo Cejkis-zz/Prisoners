@@ -6,10 +6,9 @@ classdef AlwaysCooperate < Strategy & handle
     end
     
     methods
-        function [ out ] = Action(obj, history )
+        function [ out ] = Action(obj, history, ~ )
             out = 1;
         end
     end
     
 end
-

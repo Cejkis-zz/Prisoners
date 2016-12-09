@@ -6,7 +6,7 @@ classdef AlwaysDefect < Strategy & handle
     end
     
     methods
-        function [ out ] = Action( obj,history )
+        function [ out ] = Action( obj,history, ~ )
             out = 0;
         end
     end

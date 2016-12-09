@@ -90,7 +90,7 @@ for n=1:epochs
             a2=strategiesHandles{j};
             
             %Play the PD-game.
-            utilities=pdGame(a1,a2,gameRounds,mistakeProb);
+            utilities=pdGame(a1,a2,gameRounds,mistakeProb,i,j);
             
             %Extract only the relevant parts of the utility series.
             utilities=utilities(startSave:endsave,:);
