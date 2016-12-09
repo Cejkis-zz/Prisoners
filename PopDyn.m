@@ -37,7 +37,7 @@ iCTTBMF=IllCountToThreeButMayForget;
 wWYDHT=WhatWillYouDoHT(15,0.25);
 twoInARow=TwoInARow;
 rNNNet=RNNStrategy();
-
+%swarmNet=NeuralNet(4,[3 2],1);
 
 
 %Store in cell array.
@@ -62,7 +62,6 @@ legend('Location','eastoutside');
 leg=legend('show');
 set(leg,'FontSize',10);
 
-
 %% CORE ALGO
 startSave=floor(gameRounds*(1-exPer)/2);
 endsave=gameRounds-startSave;
@@ -83,7 +82,7 @@ for n=1:epochs
     
     %Play all strategies against eachother.
     for i = 1:nrOfStrategies
-        for j = nrOfStrategies:-1:(i) %+1 if you dont want to play yoyrself.
+        for j = nrOfStrategies:-1:(i) %+1 if you dont want to play yourself.
             
             %Extract the agents.
             a1=strategiesHandles{i};
@@ -105,7 +104,7 @@ for n=1:epochs
     end
     
     %Calculate current epoch average score for all strategies.
-    %avgScorePerStrat=sum(results,2)/size(results,2);
+    avgScorePerStrat=sum(results,2)/size(results,2);
     
     %Calculate current epoch average score for all strategies, taking the
     %size of the population of the opposing strategy into account.
@@ -138,11 +137,15 @@ for n=1:epochs
             
             %Remove the line(s) from the update list.
             container{idx(p)}=[];
+            
+            %Remove from the legend if died out.
+            leg.String{idx(p)}='';
         end
         
         %Reformat the cell arrays.
         strategiesHandles=strategiesHandles(~cellfun('isempty',strategiesHandles));
         container=container(~cellfun('isempty',container));
+        leg.String=leg.String(~cellfun('isempty',leg.String));
         
         %Update the count.
         nrOfStrategies=length(strategiesHandles);
@@ -150,7 +153,8 @@ for n=1:epochs
         %Update the population variable.
         population(Gr)=0;
         population=population(population~=0);
-        
+
+       
     end
     if(numel(population)==1)
         %Last species standing. Terminate simulation.
