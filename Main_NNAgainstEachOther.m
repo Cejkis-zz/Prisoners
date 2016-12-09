@@ -1,6 +1,5 @@
 
 clear;
-ROUNDS = 100;
 
 % creating handlers for all strategies
 alwaysCoop = AlwaysCooperate;
@@ -9,24 +8,27 @@ titForTat = TitForTat;
 turnEvil = TurnEvil;
 random = Random;
 
-%getwb(net) %
-%view(net) % to check parameters of network
-
-strategiesForNN = {alwaysCoop, alwaysDefect, titForTat, turnEvil};
-
-NN = {};
-
-NN{1} = TitForTat;
-NN{2} = NeuralNet(4,4);
-NN{3} = NeuralNet(4,[3 3]);
-NN{4} = NeuralNet(4,[5 3]);
-NN{5} = NeuralNet(3,[4 2]);
-NN{6} = NeuralNet(5,[4 2]);
+NN = {  ...
+TitForTat,...
+NeuralNet(5,4,1),...
+NeuralNet(4,[3 3],1),...
+NeuralNet(3,[5 3],1),...
+NeuralNet(7,[5 3],1),...
+NeuralNet(2,[3 2],1),...
+NeuralNet(3,[5 3],1),...
+TurnEvil,...
+NeuralNet(5,4,3),...
+NeuralNet(4,[3 3],3),...
+NeuralNet(3,[5 3],3),...
+NeuralNet(7,[5 3],3),...
+NeuralNet(2,[3 2],3),...
+NeuralNet(3,[5 3],3),...
+};
 
 nets = length(NN);
 
 learningRounds = 3;
-rounds = 20;
+rounds = 100;
 
 Score = zeros(nets,rounds);
 
@@ -39,7 +41,7 @@ for i= 1:rounds
         NNOponents = NN;
         NNOponents(net) = []; % play against all except yourself   
         
-        if class(NN{net}) == 'NeuralNet'
+        if isa(NN{net},'NeuralNet')
             Score(net,i) = NN{net}.TrainNN(NNOponents, learningRounds); %
         else
             Score(net,i) = StrategyScore(NN{net}, NNOponents, 50);
@@ -50,6 +52,8 @@ for i= 1:rounds
 end
 
 plot(Score')
+
+% legend('TFT','NN1', 'NN2', 'NN3', 'NN4', 'NN5','Turnevil')
 
 
 
