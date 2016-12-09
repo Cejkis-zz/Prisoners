@@ -16,14 +16,16 @@ classdef RNNStrategy < Strategy
         
         % learning time and actions played
         training = true;
-        learning_rounds = 2000;
-        learning_rate = 2.0;
-        half_time = 100;
+        always_train = true;
+        learning_rounds = 10000;
+        learning_rate = 1;
+        learning_rates = {1.0,0.1,0.01};
+        learning_steps = {1000, 2000};
         nr_of_actions = 0;
         
         % Strategy
-        copy = true;
-        noise_ratio = 0;
+        copy = false;
+        noise_ratio = 4;
         noise = Random();
         
         % pre-training options
@@ -31,6 +33,10 @@ classdef RNNStrategy < Strategy
         strategies = {AlwaysCooperate(), AlwaysDefect(), TitForTat(), ... 
                       TurnEvil(), Random(), IllCountToThreeButMayForget(), ... 
                       WhatWillYouDoHT(15,0.25), TwoInARow()};
+                  
+        % Opponents
+        opponents = [];
+        current_opponent = 0;
     end
     
     methods
@@ -47,7 +53,19 @@ classdef RNNStrategy < Strategy
             end
         end
         
-        function out = Action(obj, history)
+        function out = Action(obj, history, id)
+            % Load opponent
+            if obj.current_opponent ~= id
+                obj.reset_state();
+                save(num2str(obj.current_opponent) + '.mat');
+                file = load(num2str(id) + '.mat');
+                obj.rnn = file.obj.rnn;
+                obj.current_opponent = id;
+                if ~any(obj.opponents == id)
+                    obj.opponents = [obj.opponents id];
+                end
+            end
+            
             obj.nr_of_actions = obj.nr_of_actions + 1;
             T = size(history, 1);
             if T > obj.memory_size
@@ -64,10 +82,10 @@ classdef RNNStrategy < Strategy
                         if obj.save_net
                             save('rnn.mat');
                         end
-                    elseif T < obj.learning_rounds
-                        obj.rnn = obj.rnn.sgd_step(history(ts1,:), history(ts2,2), obj.learning_rate);
-                        if mod(obj.nr_of_actions, obj.half_time) == 0
-                            obj.learning_rate = obj.learning_rate ./ 2;
+                    elseif T < obj.learning_rounds || obj.always_train
+                        obj.rnn = obj.rnn.sgd_step(history(ts1,:), history(ts2,2), obj.learning_rates{obj.learning_rate});
+                        if length(obj.learning_rates) > obj.learning_rate && mod(obj.nr_of_actions, obj.learning_rates{obj.learning_rate}) == 0
+                            obj.learning_rate = obj.learning_rate + 1;
                         end
                     end
                 end
@@ -144,6 +162,12 @@ classdef RNNStrategy < Strategy
         
         function start_training(obj)
             obj.training = true;
+        end
+        
+        function reset_state(obj)
+            obj.learning_rounds = 10000;
+            obj.learning_rate = 1;
+            obj.nr_of_actions = 0;
         end
     end 
 end
