@@ -34,7 +34,7 @@ for i= 1:rounds
               
     history2= [];
     score = [0,0];
-    rounds_ = 25000;
+    rounds_ = 200;
     for r = 1: rounds_
         
         pr = lstm.Action(history);
