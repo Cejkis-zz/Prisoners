@@ -69,7 +69,7 @@ classdef RNN
                 end
             end
         end
-        
+         
         function obj = sgd_step(obj, x, y)
             % Calculate the gradients
             [dEdWx, dEdWh, dEdWy] = obj.bptt(x, y);

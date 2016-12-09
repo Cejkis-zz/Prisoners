@@ -11,7 +11,7 @@ classdef NeuralNet < Strategy & handle
         hiddenLayerSize
         
         % parameters of PSO
-        popSize = 10; % has impact on speed (default: 20)
+        popSize % has impact on speed (default: 10)
         c1 = 2; % impact of particle best value on velocity (default: 2)
         c2 = 3; % impact of swarm best value on velocity (default: 2)
         velocityFactorChange = 0.995; % (between two iterations) (velocity * weightFactor^it) velocity factor factor :D (default: 0.99)
@@ -34,7 +34,7 @@ classdef NeuralNet < Strategy & handle
     
     methods
         
-        function obj = NeuralNet(rounds, layers)
+        function obj = NeuralNet(rounds, layers, particles)
             
             obj = obj@Strategy();
             
@@ -54,7 +54,7 @@ classdef NeuralNet < Strategy & handle
                 obj.net = train(obj.net,zeros(obj.inputRounds*2,5),1:5); % doesn't have any sense, just to init the network
             end
             
-            
+            obj.popSize = particles;
             
             obj.xDiff = obj.xMax - obj.xMin;
             
@@ -100,7 +100,10 @@ classdef NeuralNet < Strategy & handle
                 % Evaluate all particles, update particle and swarm best.
                 for i = 1:obj.popSize
                     
-                    obj.fitness(i) = EvaluateWeights(obj, obj.population(i,:), strategiesForNN);
+                    setwb(obj.net, obj.population(i,:));
+                    obj.fitness(i) = StrategyScore(obj, strategiesForNN, 50);
+                    
+                    %obj.fitness(i) = EvaluateWeights(obj, obj.population(i,:), strategiesForNN);
                     
                     if obj.fitness(i) > obj.particleBestFitness(i)
                         obj.particleBest(i,:) = obj.population(i,:);
@@ -152,41 +155,7 @@ classdef NeuralNet < Strategy & handle
             
         end
         
-        function [ payoff ] = EvaluateWeights( obj, weights, strategiesForNN )
-            % for given weights and network runs the prisoners dilemma and returns
-            % average payoff for all given strategies.
-            
-            obj.net = setwb(obj.net, weights); % set weights produced by particle swarm swarm
-            
-            score = [0,0];
-            nrOfRounds = 50;
-            
-            for strategy = strategiesForNN
-                
-                history1 = [];
-                % history2 = []; % NN doesn't give a damn about history ordering, so we
-                % can use 1 matrix for both.
-                
-                for i = 1:nrOfRounds
-                    
-                    p1 = Action(strategy{1},history1); % against which strategy will we play
-                    
-                    p2 = Action(obj, history1);
-                    
-                    history1 = [history1; p1 p2]; % update history matrix
-                    utilities = PrisonersRound(p1, p2); % compute utilities for both prisoners
-                    score = score + utilities;
-                    
-                end
-            end
-            
-            payoff = (score(2)/nrOfRounds)/length(strategiesForNN); % average score per round
-            
-            fprintf('%f\n', payoff);
-            
-        end
-        
-    end
+    end  
     
 end
 
