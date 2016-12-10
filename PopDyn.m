@@ -122,8 +122,8 @@ for n=1:epochs
     %avgScoreForEpoch=mean(avgScorePerStrat);
     
     %Weighted average for the epoch.
-    popScale=population./sum(population);
-    avgScoreForEpoch=sum(avgScorePerStrat.*popScale)./length(popScale);
+    popShare=population./sum(population);
+    avgScoreForEpoch=sum(avgScorePerStrat.*popShare);
     
     %Get the percentage of the average each strategy reached.
     fitness=avgScorePerStrat./avgScoreForEpoch;
@@ -169,7 +169,7 @@ for n=1:epochs
     end
     
     %Round to an integer amount of agents.
-    population=round(population);
+    %population=round(population);
 end
 
 %Print the strategies still alive. And their share of the population.
