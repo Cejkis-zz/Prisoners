@@ -41,8 +41,8 @@ rNNNet=RNNStrategy();
 %swarmNet=NeuralNet(4,[3 2],1);
 
 %Store in cell array.
-strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,iCTTBMF,wWYDHT,twoInARow};
-%  strategiesHandles = { alwaysCoop,titForTat,rNNNet};
+% strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,iCTTBMF,wWYDHT,twoInARow};
+ strategiesHandles = { alwaysCoop,titForTat,alwaysDefect,random};
 nrOfStrategies = length(strategiesHandles);
 
 %% Set up initial population.
@@ -51,12 +51,17 @@ population=ones(nrOfStrategies,1);
 population=population/norm(population).*popMag;
 
 % Set up the line animations.
-container=cell(nrOfStrategies,1);
+%Preallocation.
+container=repmat(animatedline,nrOfStrategies,1);
 
+%Remove the dum-dum line.
+clf
+
+%Add the real lines.
 for n=1:nrOfStrategies
     aline=animatedline('Color',[rand rand rand]);
     set(aline,'DisplayName',class(strategiesHandles{n}));
-    container{n}=aline;
+    container(n)=aline;
 end
 
 legend('Location','eastoutside');
@@ -75,7 +80,7 @@ for n=1:epochs
     
     %Draw the pop dynamics.
     for s=1:nrOfStrategies
-        addpoints(container{s},n,population(s));
+        addpoints(container(s),n,population(s));
     end
     drawnow;
     
@@ -141,16 +146,14 @@ for n=1:epochs
             strategiesHandles{idx(p)}=[];
             
             %Remove the line(s) from the update list.
-            container{idx(p)}=[];
-            
-            %Remove from the legend if died out.
-            leg.String{idx(p)}='';
+            container(idx(p))=[];
         end
         
         %Reformat the cell arrays.
         strategiesHandles=strategiesHandles(~cellfun('isempty',strategiesHandles));
-        container=container(~cellfun('isempty',container));
-        leg.String=leg.String(~cellfun('isempty',leg.String));
+        
+        %Recreate the legend.
+        leg=legend(container);
         
         %Update the count.
         nrOfStrategies=length(strategiesHandles);
@@ -158,8 +161,7 @@ for n=1:epochs
         %Update the population variable.
         population(Gr)=0;
         population=population(population~=0);
-
-       
+        
     end
     if(numel(population)==1)
         %Last species standing. Terminate simulation.
@@ -167,7 +169,7 @@ for n=1:epochs
     end
     
     %Round to an integer amount of agents.
-    %population=round(population);
+    population=round(population);
 end
 
 %Print the strategies still alive. And their share of the population.
