@@ -26,16 +26,13 @@ classdef RNN
         end
         
         function [o, h] = forward_propagation(obj, x)
-            % The total number of time steps
             T = size(x,1);
-            % Save all hidden states in s.
-            % We add one additional element for the initial hidden, which we set to 0
+            % Hidden states
             h = zeros(T + 1, obj.n_hidden);
             h(1, :) = zeros(1, obj.n_hidden);
-            % The outputs at each time step.
+            % Outputs
             o = zeros(T, obj.n_y);
-            % For each time step.
-            for t = 1:T
+            for t = 1:T % For each time step
                 h(t+1,:) = tanh( obj.Wx * x(t,:)' + obj.Wh * h(t,:)' )';
                 o(t,:) = obj.sigmoid(obj.Wy * h(t+1,:)');
             end
@@ -52,81 +49,39 @@ classdef RNN
             dEdWx = zeros(size(obj.Wx));
             dEdWh = zeros(size(obj.Wh));
             dEdWy = zeros(size(obj.Wy));
+            
             dEdo = - (y - o);
-            dEdWyh =  dEdo .* o.*(1-o); %obj.d_sigmoid(h(end,:));
+            dEdWyh =  dEdo .* o.*(1-o);
             % For each output backwards.
             for t = T:-1:1
                 dEdWy = dEdWy + dEdWyh(t,:) .* h(t+1,:); % outer product
-                % Initial delta calculation
                 delta_t = (obj.Wy' * dEdWyh(t,:)) .* (1 - (h(t+1,:)' .^ 2));
-                % Backpropagation through time (for at most obj.bptt_truncate steps)
-                bptt_steps = t:-1:max(1, t-obj.bptt_truncate);
-                for bptt_step = bptt_steps
+                % BackPropagation Through Time 
+                bptt_steps = t:-1:max(1, t-obj.bptt_truncate); 
+                for bptt_step = bptt_steps % for at most obj.bptt_truncate steps 
                     dEdWh = dEdWh + delta_t * h(bptt_step+1,:); % outer product            
                     dEdWx = dEdWx + delta_t * x(bptt_step,:);   % outer product
-                    % Update delta for next step
                     delta_t = obj.Wh' * delta_t .* (1 - h(bptt_step+1,:)' .^ 2);
                 end
             end
         end
-        
-       function [o, h] = forward_propagation_relu(obj, x)
-            % The total number of time steps
-            T = size(x,1);
-            % Save all hidden states in s.
-            % We add one additional element for the initial hidden, which we set to 0
-            h = zeros(T + 1, obj.n_hidden);
-            h(1, :) = zeros(1, obj.n_hidden);
-            % The outputs at each time step.
-            o = zeros(T, obj.n_y);
-            % For each time step.
-            for t = 1:T
-                h(t+1,:) = max(0, ( obj.Wx * x(t,:)' + obj.Wh * h(t,:)' ))';
-                o(t,:) = obj.sigmoid(obj.Wy * h(t+1,:)');
-            end
-        end
-        
-        function [dEdWx, dEdWh, dEdWy] = bptt_relu(obj, x, y)
-            T = size(y, 1);
-            [o, h] = obj.forward_propagation(x);
-            dEdWx = zeros(size(obj.Wx));
-            dEdWh = zeros(size(obj.Wh));
-            dEdWy = zeros(size(obj.Wy));
-            dEdo = - (y - o);
-            dEdWyh =  dEdo .* o.*(1-o); %obj.d_sigmoid(h(end,:));
-            % For each output backwards.
-            for t = T:-1:1
-                dEdWy = dEdWy + dEdWyh(t,:) .* h(t+1,:); % outer product
-                % Initial delta calculation
-                delta_t = (obj.Wy' * dEdWyh(t,:)) .* (1 - (h(t+1,:)' .^ 2));
-                % Backpropagation through time (for at most obj.bptt_truncate steps)
-                bptt_steps = t:-1:max(1, t-obj.bptt_truncate);
-                for bptt_step = bptt_steps
-                    dEdWh = dEdWh + delta_t * h(bptt_step+1,:); % outer product            
-                    dEdWx = dEdWx + delta_t * x(bptt_step,:);   % outer product
-                    % Update delta for next step
-                    relu = h(bptt_step+1,:) > 0;
-                    delta_t = obj.Wh' * delta_t .* relu';
-                end
-            end
-        end
-                
-        function obj = sgd_step(obj, x, y, n)
-            % Calculate the gradients
+                 
+        function obj = sgd(obj, x, y, n)
             [dEdWx, dEdWh, dEdWy] = obj.bptt(x, y);
-            % Change parameters according to gradients and learning rate
+            
             obj.Wx = obj.Wx - n * dEdWx;
             obj.Wh = obj.Wh - n * dEdWh;
             obj.Wy = obj.Wy - n * dEdWy;
         end
         
-        function res = d_sigmoid(obj, x)
-            res = obj.sigmoid(x).*(1-obj.sigmoid(x));
-        end
-        
         function res = sigmoid(obj, x)
             res = 1 ./ (1 + exp(-x));
         end
+        
+        function res = d_sigmoid(obj, x)
+            res = obj.sigmoid(x).*(1-obj.sigmoid(x));
+        end
+
     end
 end
 

@@ -15,8 +15,9 @@ strategiesForNN = {alwaysCoop, alwaysDefect, titForTat, turnEvil};
 
 NN = {};
 
-tit =  TwoInARow(); %TitForTat();
-%tit = alwaysDefect;
+%tit =  IllCountToThreeButMayForget(); %TwoInARow(); %TitForTat();
+tit = WhatWillYouDoHT(4,0.25);
+%tit = TitForTat();
 lstm = RNNStrategy();
 
 nets = length(NN);
@@ -34,15 +35,15 @@ for i= 1:rounds
               
     history2= [];
     score = [0,0];
-    rounds_ = 200;
+    rounds_ = 15000;
     for r = 1: rounds_
         
-        pr = lstm.Action(history);
+        pr = lstm.Action(history, 2);
         p1 = round(pr(1)); % get the move of each prisoner
         if r > 1
-        p2 = tit.Action([history(:,2),history(:,1)]); % history columns need to be swapped
+        p2 = tit.Action([history(:,2),history(:,1)],2); % history columns need to be swapped
         else
-        p2 = tit.Action(history);
+        p2 = tit.Action(history,1);
         end
         history = [history; p1 p2]; % update history matrix
         history2 = [history2; pr p1 p2];

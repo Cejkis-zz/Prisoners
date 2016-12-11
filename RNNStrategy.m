@@ -17,22 +17,24 @@ classdef RNNStrategy < Strategy
         % learning time and actions played
         training = true;
         always_train = true;
-        learning_rounds = 10000;
+        learning_rounds = 20000;
         learning_rate = 1;
-        learning_rates = {1.0,0.1,0.01};
-        learning_steps = {1000, 2000};
+        learning_rates = {0.1,0.01,0.0}; %{2.0, 1.0, 0.5, 0.1, 0.01, 0.0};
+        learning_steps = {8000,100000}; %{100, 200, 500, 2000, 10000};
         nr_of_actions = 0;
         
         % Strategy
         copy = false;
-        noise_ratio = 4;
-        noise = Random();
+        init_time = 10000;
+        init_strategy = AlwaysCooperate();
+        noise_ratio = 1;
+        noise = AlwaysDefect(); %Random();
         
         % pre-training options
         pre_training = false;
         strategies = {AlwaysCooperate(), AlwaysDefect(), TitForTat(), ... 
                       TurnEvil(), Random(), IllCountToThreeButMayForget(), ... 
-                      WhatWillYouDoHT(15,0.25), TwoInARow()};
+                      WhatWillYouDoHT(4,0.25), TwoInARow()};
                   
         % Opponents
         opponents = [];
@@ -56,50 +58,58 @@ classdef RNNStrategy < Strategy
         function out = Action(obj, history, id)
             % Load opponent
             if obj.current_opponent ~= id
-                obj.reset_state();
-                save(num2str(obj.current_opponent) + '.mat');
-                file = load(num2str(id) + '.mat');
-                obj.rnn = file.obj.rnn;
-                obj.current_opponent = id;
+                save(strcat(num2str(obj.current_opponent), '.mat'));
+                
                 if ~any(obj.opponents == id)
                     obj.opponents = [obj.opponents id];
+                    obj.reset_state();
+                else % Has already played against the opponent
+                    obj.load_state(id);
                 end
+                
+                obj.current_opponent = id;
             end
             
             obj.nr_of_actions = obj.nr_of_actions + 1;
+            
+            % Training
+            if obj.training
+                obj.train_net(history);
+            end
+
+            T = size(history, 1);
+            if T == 0
+                out = 1; % initially Cooperate
+            elseif obj.init_time > obj.nr_of_actions
+                p = rand;
+                
+                if p > 0.16 %mod(obj.nr_of_actions, obj.noise_ratio) == 0 %T < obj.init_time
+                    %out = obj.noise.Action(history(ts2,:));
+                    out = 1; % obj.init_strategy.Action(history(ts2,:));
+                else
+                    out = 0;
+                end
+            else
+                ts = max(1, T+1-obj.memory_size):T;
+                if obj.copy                 
+                    out = obj.rnn.predict(history(ts,:));
+                else
+                    out = obj.policy(history(ts,:));
+                end
+            end
+        end
+        
+        function train_net(obj, history)
             T = size(history, 1);
             if T > obj.memory_size
                 ts1 = (T-obj.memory_size:T-1);
                 ts2 = (T-obj.memory_size+1:T);
-            else
-                ts1 = 1:T; ts2 = 1:T;
-            end
-            
-            % Training
-            if T > obj.memory_size
-                if obj.training
-                    if T == obj.learning_rounds 
-                        if obj.save_net
-                            save('rnn.mat');
-                        end
-                    elseif T < obj.learning_rounds || obj.always_train
-                        obj.rnn = obj.rnn.sgd_step(history(ts1,:), history(ts2,2), obj.learning_rates{obj.learning_rate});
-                        if length(obj.learning_rates) > obj.learning_rate && mod(obj.nr_of_actions, obj.learning_rates{obj.learning_rate}) == 0
-                            obj.learning_rate = obj.learning_rate + 1;
-                        end
-                    end
-                end
-            end
 
-            if T == 0
-                out = 1; % initially Cooperate
-            elseif (obj.learning_rounds > obj.nr_of_actions && mod(obj.nr_of_actions, obj.noise_ratio) == 0) %T < obj.init_time
-                out = obj.noise.Action(history(ts2,:));
-            else
-                if obj.copy
-                    out = obj.rnn.predict(history(ts2,:));
-                else
-                    out = obj.policy(history(ts2,:));
+                if obj.learning_rates{obj.learning_rate} > 0.001
+                    obj.rnn = obj.rnn.sgd(history(ts1,:), history(ts2,2), obj.learning_rates{obj.learning_rate});
+                    if length(obj.learning_rates) > obj.learning_rate && mod(obj.nr_of_actions, obj.learning_steps{obj.learning_rate}) == 0
+                        obj.learning_rate = obj.learning_rate + 1;
+                    end
                 end
             end
         end
@@ -165,9 +175,15 @@ classdef RNNStrategy < Strategy
         end
         
         function reset_state(obj)
-            obj.learning_rounds = 10000;
-            obj.learning_rate = 1;
             obj.nr_of_actions = 0;
+            obj.learning_rate = 1;
+        end
+        
+        function load_state(obj, id)
+            file = load(strcat(num2str(id), '.mat'));
+            obj.rnn = file.obj.rnn;
+            obj.learning_rate = file.obj.learning_rate;
+            obj.nr_of_actions = file.obj.nr_of_actions;
         end
     end 
 end
