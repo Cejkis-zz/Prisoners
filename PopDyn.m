@@ -4,7 +4,7 @@ clear
 figure(1)
 %% Parameters
 %The number of iterations the complete simulation will run for.
-epochs=500;
+epochs=250;
 
 % The initial magnitude of the population vector.
 popMag=1000;
@@ -13,7 +13,7 @@ popMag=1000;
 critPop=1;
 
 %Rounds to run the pd-game for.
-gameRounds=250;
+gameRounds=500;
 
 %How much of the pd rounds that will be cut of. Eg 0.80 would mean that 10%
 %at the beginning and end of the rounds will be discarded in the average.
@@ -37,15 +37,15 @@ titForTat = TitForTat;
 turnEvil = TurnEvil;
 random = Random;
 iCTTBMF=IllCountToThreeButMayForget;
-wWYDHT=WhatWillYouDoHT(15,0.25);
+wWYDHT=WhatWillYouDoHT(4,0.25);
 twoInARow=TwoInARow;
 
 rNNNet=RNNStrategy();
 %swarmNet=NeuralNet(4,[3 2],1);
 
 %Store in cell array.
- strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,iCTTBMF,wWYDHT,twoInARow};
-%   strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,wWYDHT,twoInARow,rNNNet};
+%  strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,iCTTBMF,wWYDHT,twoInARow};
+  strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,wWYDHT,twoInARow,rNNNet};
 %  strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,twoInARow};
 nrOfStrategies = length(strategiesHandles);
 
@@ -80,6 +80,9 @@ endsave=gameRounds-startSave;
 %USAGE: To check the history between strategy i vs j in epoch k,
 %call hist(k,i,j).
 if(saveData)
+    %Find the index of neural network strategies.
+    %TODO
+    
     hists=cell(epochs,nrOfStrategies,nrOfStrategies);
 end
 
@@ -119,7 +122,7 @@ for n=1:epochs
             
             %Save data if desired.
             if(saveData)
-                hists{n,i,j}=hist;
+                hists{n,a1.get(),a2.getID()}=hist;
             end
         end
     end
@@ -127,14 +130,8 @@ for n=1:epochs
     %Calculate current epoch average score for all strategies.
     avgScorePerStrat=sum(results,2)/size(results,2);
     
-    %Calculate current epoch average score for all strategies, taking the
-    %size of the population of the opposing strategy into account.
-    %popScale=repmat(population'./sum(population),[size(results,1) 1]);
-    %scaledResults=results.*popScale;
-    %avgScorePerStrat=sum(scaledResults,2)/size(results,2);
-    
     %Total average for the epoch.
-%     avgScoreForEpoch=mean(avgScorePerStrat);
+%   avgScoreForEpoch=mean(avgScorePerStrat);
     
     %Weighted average for the epoch.
     popShare=population./sum(population);
