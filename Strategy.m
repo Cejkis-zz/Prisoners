@@ -3,7 +3,6 @@ classdef (Abstract) Strategy < handle
     %   Detailed explanation goes here
     
     properties
-        id;
     end
     
     methods (Abstract)

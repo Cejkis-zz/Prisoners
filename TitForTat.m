@@ -14,6 +14,14 @@ classdef TitForTat < Strategy & handle
             
             out = history(end, 2);
         end
+        
+        function out = get_id(obj)
+            out = obj.id;
+        end
+        
+        function set_id(obj, id)
+            obj.id = id;
+        end
     end
     
 end
