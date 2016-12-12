@@ -4,6 +4,7 @@ classdef IllCountToThreeButMayForget< Strategy
     
     properties
         threeCounter=0;
+        id = 0;
     end
     
     methods
@@ -43,5 +44,12 @@ classdef IllCountToThreeButMayForget< Strategy
             end
         end
         
+        function out = get_id(obj)
+            out = obj.id;
+        end
+        
+        function set_id(obj, id)
+            obj.id = id;
+        end
     end
 end

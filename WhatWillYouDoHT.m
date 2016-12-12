@@ -7,6 +7,7 @@ classdef WhatWillYouDoHT < Strategy
     properties
         horizon;
         tresh;
+        id = 0;
     end
     
     methods
@@ -37,6 +38,14 @@ classdef WhatWillYouDoHT < Strategy
                 return
             end
             out =1;
+        end
+        
+        function out = get_id(obj)
+            out = obj.id;
+        end
+        
+        function set_id(obj, id)
+            obj.id = id;
         end
     end
     

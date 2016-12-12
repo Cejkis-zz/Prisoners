@@ -4,6 +4,7 @@ classdef TurnEvil < Strategy & handle
     
     properties
         % state
+        id = 0;
     end
     
     methods
@@ -23,6 +24,14 @@ classdef TurnEvil < Strategy & handle
                 
             end
 
+        end
+        
+        function out = get_id(obj)
+            out = obj.id;
+        end
+        
+        function set_id(obj, id)
+            obj.id = id;
         end
     end   
 end

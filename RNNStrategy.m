@@ -35,6 +35,9 @@ classdef RNNStrategy < Strategy
         % Opponents
         opponents = [];
         current_opponent = 0;
+        
+        % My id
+        id = 0;
     end
     
     methods
@@ -49,6 +52,14 @@ classdef RNNStrategy < Strategy
                    %obj.pre_test();
                 end
             end
+        end
+        
+        function out = get_id(obj)
+            out = obj.id;
+        end
+        
+        function set_id(obj, id)
+            obj.id = id;
         end
         
         function out = Action(obj, history, id)

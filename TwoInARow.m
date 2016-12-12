@@ -3,6 +3,7 @@ classdef TwoInARow < Strategy & handle
     %   Pattern: 11001100110011
     
     properties
+        id = 0;
     end
     
     methods
@@ -21,6 +22,14 @@ classdef TwoInARow < Strategy & handle
             else
                 out = history(end, 1);
             end
+        end
+        
+        function out = get_id(obj)
+            out = obj.id;
+        end
+        
+        function set_id(obj, id)
+            obj.id = id;
         end
     end
     

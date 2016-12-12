@@ -3,12 +3,14 @@ classdef (Abstract) Strategy < handle
     %   Detailed explanation goes here
     
     properties
+        id;
     end
     
     methods (Abstract)
         
-        Action( obj,history )
-
+        Action( obj,history,id )
+        get_id( obj )
+        set_id( obj,id )
     end
     
 end
