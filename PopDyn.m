@@ -13,14 +13,14 @@ popMag=1000;
 critPop=1;
 
 %Rounds to run the pd-game for.
-gameRounds=300;
+gameRounds=100;
 
 %How much of the pd rounds that will be cut of. Eg 0.80 would mean that 10%
 %at the beginning and end of the rounds will be discarded in the average.
 exPer=0.90;
 
 %Setting for having a risk of mistakes happening.
-mistakeProb=0.035;
+mistakeProb=0.0975;
 
 %Severity scale. Used to either suppress or increase the harshness of the
 %dynamics. Default is 1;
@@ -42,7 +42,7 @@ rNNNet=RNNStrategy();
 
 %Store in cell array.
 % strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,iCTTBMF,wWYDHT,twoInARow};
- strategiesHandles = { alwaysCoop,titForTat,alwaysDefect,random};
+ strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,twoInARow};
 nrOfStrategies = length(strategiesHandles);
 
 %% Set up initial population.
@@ -119,7 +119,7 @@ for n=1:epochs
     %avgScorePerStrat=sum(scaledResults,2)/size(results,2);
     
     %Total average for the epoch.
-    %avgScoreForEpoch=mean(avgScorePerStrat);
+%     avgScoreForEpoch=mean(avgScorePerStrat);
     
     %Weighted average for the epoch.
     popShare=population./sum(population);
@@ -141,13 +141,14 @@ for n=1:epochs
     Gr=(population<critPop); %Gr-->GrimReaper has arrived.
     idx=find(Gr);
     if (idx)
+        
         for p=1:length(idx)
             %Remove the strategy/strategies.
             strategiesHandles{idx(p)}=[];
-            
-            %Remove the line(s) from the update list.
-            container(idx(p))=[];
         end
+        
+        %Remove the line(s) from the update list.
+        container(idx)=[];
         
         %Reformat the cell arrays.
         strategiesHandles=strategiesHandles(~cellfun('isempty',strategiesHandles));
