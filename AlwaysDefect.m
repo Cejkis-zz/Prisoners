@@ -11,7 +11,7 @@ classdef AlwaysDefect < Strategy & handle
             out = 0;
         end
         
-        function out = get_id()
+        function out = get_id(obj)
             out = obj.id;
         end
         

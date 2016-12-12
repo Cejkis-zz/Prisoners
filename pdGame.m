@@ -1,4 +1,4 @@
-function [ utilities,history ] = pdGame(a1,a2,gameRounds,mistakeProb, id1, id2)
+function [ utilities,history ] = pdGame(a1,a2,gameRounds,mistakeProb)
 %pdGame Playes the iterated prisoners dilemma game for a specified number
 %of rounds and returns the utility for each agent for each round.
 %   Parameters:
@@ -14,10 +14,13 @@ utilities = zeros(gameRounds,2);
 
 for r = 1: gameRounds
     
+    % get the id of each player.
+    a1id = a1.get_id();
+    a2id = a2.get_id();
     % get the move of each player.
-    p1 = a1.Action(history(1:r-1,:), id2);
+    p1 = a1.Action(history(1:r-1,:), a2id);
     %Change columns of the history for the opponent.
-    p2 = a2.Action([history(1:r-1,2),history(1:r-1,1)],id1);
+    p2 = a2.Action([history(1:r-1,2),history(1:r-1,1)],a1id);
     
     %A mistake might occur. This causes choice to "flip".
     if(rand<mistakeProb)

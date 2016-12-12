@@ -3,6 +3,7 @@ classdef TitForTat < Strategy & handle
     %   Detailed explanation goes here
     
     properties
+        id = 0;
     end
     
     methods

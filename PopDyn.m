@@ -54,6 +54,12 @@ nrOfStrategies = length(strategiesHandles);
 population=ones(nrOfStrategies,1);
 population=population/norm(population).*popMag;
 
+% Set id for all strategies
+for n=1:nrOfStrategies
+    strategy=strategiesHandles{n};
+    strategy.set_id(n);
+end
+
 % Set up the line animations.
 %Preallocation.
 container=repmat(animatedline,nrOfStrategies,1);
@@ -109,7 +115,7 @@ for n=1:epochs
             a2=strategiesHandles{j};
             
             %Play the PD-game.
-            [utilities,hist]=pdGame(a1,a2,gameRounds,mistakeProb,i,j);
+            [utilities,hist]=pdGame(a1,a2,gameRounds,mistakeProb);
             
             %Extract only the relevant parts of the utility series.
             utilities=utilities(startSave:endsave,:);
@@ -122,7 +128,7 @@ for n=1:epochs
             
             %Save data if desired.
             if(saveData)
-                hists{n,a1.get(),a2.getID()}=hist;
+                hists{n,a1.get_id(),a2.get_id()}=hist;
             end
         end
     end
