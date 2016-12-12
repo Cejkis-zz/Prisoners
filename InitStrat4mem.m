@@ -32,8 +32,8 @@ classdef InitStrat4mem < Strategy & handle
 
             if obj.innerCount > 4
                 obj.stratCounter = obj.stratCounter+1;
-                if obj.stratCounter > 8
-                	obj.strategyNrs = randperm(8);
+                if obj.stratCounter > 16
+                	obj.strategyNrs = randperm(16);
                 	obj.stratCounter = 1;
                 end
                 obj.strategyNr = obj.strategyNrs(obj.stratCounter);
