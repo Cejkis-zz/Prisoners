@@ -25,10 +25,10 @@ classdef InitStrat3mem < Strategy & handle
                       
             if obj.innerCount > 3
                 obj.stratCounter = obj.stratCounter+1;
-                    if obj.stratCounter > 8
-                        obj.strategyNrs = randperm(8);
-                        obj.stratCounter = 1;
-                    end
+                if obj.stratCounter > 8
+                    obj.strategyNrs = randperm(8);
+                    obj.stratCounter = 1;
+                end
                 obj.strategyNr = obj.strategyNrs(obj.stratCounter);
                 obj.innerCount = 1;
             end
