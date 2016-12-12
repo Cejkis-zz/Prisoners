@@ -16,19 +16,15 @@ classdef RNNStrategy < Strategy
         
         % learning time and actions played
         training = true;
-        always_train = true;
-        learning_rounds = 20000;
         learning_rate = 1;
-        learning_rates = {0.1,0.01,0.0}; %{2.0, 1.0, 0.5, 0.1, 0.01, 0.0};
-        learning_steps = {8000,100000}; %{100, 200, 500, 2000, 10000};
+        learning_rates = {1.0,0.1,0.01,0.0}; %{2.0, 1.0, 0.5, 0.1, 0.01, 0.0};
+        learning_steps = {2000,10000,100000}; %{100, 200, 500, 2000, 10000};
         nr_of_actions = 0;
         
         % Strategy
         copy = false;
-        init_time = 10000;
-        init_strategy = AlwaysCooperate();
-        noise_ratio = 1;
-        noise = AlwaysDefect(); %Random();
+        init_time = 5000;
+        init_strategy = TitForTat();
         
         % pre-training options
         pre_training = false;
@@ -82,10 +78,10 @@ classdef RNNStrategy < Strategy
                 out = 1; % initially Cooperate
             elseif obj.init_time > obj.nr_of_actions
                 p = rand;
-                
-                if p > 0.16 %mod(obj.nr_of_actions, obj.noise_ratio) == 0 %T < obj.init_time
-                    %out = obj.noise.Action(history(ts2,:));
-                    out = 1; % obj.init_strategy.Action(history(ts2,:));
+                if p > 0.5 %mod(obj.nr_of_actions, obj.noise_ratio) == 0 %T < obj.init_time
+                    out = obj.init_strategy.Action(history);
+                elseif p > 0.25
+                    out = 1;
                 else
                     out = 0;
                 end
