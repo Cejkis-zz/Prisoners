@@ -4,7 +4,9 @@ classdef InitStrat3mem < Strategy & handle
     properties
         id = 0;
         innerCount = 99;
-        strategyNr = 99;
+        stratCounter = 99;
+        strategyNr;
+        strategyNrs;
     end
     
     methods
@@ -20,11 +22,17 @@ classdef InitStrat3mem < Strategy & handle
                           {0,0,1},  ...    
                           {0,0,0}};   
                       
+                      
             if obj.innerCount > 3
-                obj.strategyNr = randi([1 8],1,1);
+                obj.stratCounter = obj.stratCounter+1;
+                    if obj.stratCounter > 8
+                        obj.strategyNrs = randperm(8);
+                        obj.stratCounter = 1;
+                    end
+                obj.strategyNr = obj.strategyNrs(obj.stratCounter);
                 obj.innerCount = 1;
             end
-            
+
             outtmp = strategies{obj.strategyNr};
             out = outtmp{obj.innerCount};
             obj.innerCount = obj.innerCount+1;
