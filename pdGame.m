@@ -1,4 +1,4 @@
-function [ utilities ] = pdGame(a1,a2,gameRounds,mistakeProb, id1, id2)
+function [ utilities,history ] = pdGame(a1,a2,gameRounds,mistakeProb, id1, id2)
 %pdGame Playes the iterated prisoners dilemma game for a specified number
 %of rounds and returns the utility for each agent for each round.
 %   Parameters:

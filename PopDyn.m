@@ -13,18 +13,21 @@ popMag=1000;
 critPop=1;
 
 %Rounds to run the pd-game for.
-gameRounds=100;
+gameRounds=250;
 
 %How much of the pd rounds that will be cut of. Eg 0.80 would mean that 10%
 %at the beginning and end of the rounds will be discarded in the average.
 exPer=0.90;
 
 %Setting for having a risk of mistakes happening.
-mistakeProb=0.0975;
+mistakeProb=0.035;
 
 %Severity scale. Used to either suppress or increase the harshness of the
 %dynamics. Default is 1;
 sevScale=1.0;
+
+%Flag for saving the histories for the neuralNetworks. Data saved in a matrix.
+saveData=1;
 
 %% Set up the involved strategies.
 
@@ -41,8 +44,9 @@ rNNNet=RNNStrategy();
 %swarmNet=NeuralNet(4,[3 2],1);
 
 %Store in cell array.
-% strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,iCTTBMF,wWYDHT,twoInARow};
- strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,twoInARow};
+ strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,iCTTBMF,wWYDHT,twoInARow};
+%   strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,wWYDHT,twoInARow,rNNNet};
+%  strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,twoInARow};
 nrOfStrategies = length(strategiesHandles);
 
 %% Set up initial population.
@@ -72,6 +76,13 @@ set(leg,'FontSize',10);
 startSave=floor(gameRounds*(1-exPer)/2);
 endsave=gameRounds-startSave;
 
+%Preallocate the data storage if save is desired.
+%USAGE: To check the history between strategy i vs j in epoch k,
+%call hist(k,i,j).
+if(saveData)
+    hists=cell(epochs,nrOfStrategies,nrOfStrategies);
+end
+
 %For all of the epochs.
 for n=1:epochs
     
@@ -88,14 +99,14 @@ for n=1:epochs
     
     %Play all strategies against eachother.
     for i = 1:nrOfStrategies
-        for j = nrOfStrategies:-1:(i) %+1 if you dont want to play yourself.
+        for j = nrOfStrategies:-1:(i+1)% +1 if you dont want to play yourself.
             
             %Extract the agents.
             a1=strategiesHandles{i};
             a2=strategiesHandles{j};
             
             %Play the PD-game.
-            utilities=pdGame(a1,a2,gameRounds,mistakeProb,i,j);
+            [utilities,hist]=pdGame(a1,a2,gameRounds,mistakeProb,i,j);
             
             %Extract only the relevant parts of the utility series.
             utilities=utilities(startSave:endsave,:);
@@ -106,6 +117,10 @@ for n=1:epochs
             results(i,j) = avgUtil(1);
             results(j,i)=avgUtil(2);
             
+            %Save data if desired.
+            if(saveData)
+                hists{n,i,j}=hist;
+            end
         end
     end
     
