@@ -7,8 +7,8 @@ classdef RNN
         n_in = 2;
         n_hidden = 4;
         n_y = 1;
-        mean = 0.1;
-        var = 0.01;
+        mean = 0;
+        var = 1;
         Wx;
         Wh;
         Wy;

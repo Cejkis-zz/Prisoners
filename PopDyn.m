@@ -24,7 +24,7 @@ mistakeProb=0.035;
 
 %Severity scale. Used to either suppress or increase the harshness of the
 %dynamics. Default is 1;
-sevScale=1.0;
+sevScale=0.3;
 
 %Flag for saving the histories for the neuralNetworks. Data saved in a matrix.
 saveData=1;
@@ -37,7 +37,7 @@ titForTat = TitForTat;
 turnEvil = TurnEvil;
 random = Random;
 iCTTBMF=IllCountToThreeButMayForget;
-wWYDHT=WhatWillYouDoHT(4,0.25);
+wWYDHT=WhatWillYouDoHT(3,0.34);
 twoInARow=TwoInARow;
 
 rNNNet=RNNStrategy();
@@ -45,7 +45,7 @@ rNNNet=RNNStrategy();
 
 %Store in cell array.
 %  strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,iCTTBMF,wWYDHT,twoInARow};
-  strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,wWYDHT,twoInARow,rNNNet};
+  strategiesHandles = {titForTat,alwaysCoop, alwaysDefect, titForTat, turnEvil, random,twoInARow,rNNNet};
 %  strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,twoInARow};
 nrOfStrategies = length(strategiesHandles);
 
@@ -68,10 +68,23 @@ container=repmat(animatedline,nrOfStrategies,1);
 clf
 
 %Add the real lines.
+%for n=1:nrOfStrategies
+%    aline=animatedline('Color',[rand rand rand]);
+%    set(aline,'DisplayName',class(strategiesHandles{n}));
+%    container(n)=aline;
+%end
+%Color network red (for presentation)
 for n=1:nrOfStrategies
-    aline=animatedline('Color',[rand rand rand]);
-    set(aline,'DisplayName',class(strategiesHandles{n}));
-    container(n)=aline;
+    if n==8
+        aline=animatedline('Color',[1 0 0]);
+        set(aline,'DisplayName',class(strategiesHandles{n}));
+        aline.LineWidth = 2;
+        container(n)=aline;
+    else
+        aline=animatedline('Color',[0 0 0]);
+        set(aline,'DisplayName',class(strategiesHandles{n}));
+        container(n)=aline;
+    end
 end
 
 legend('Location','eastoutside');

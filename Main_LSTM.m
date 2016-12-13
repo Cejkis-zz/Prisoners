@@ -16,8 +16,8 @@ strategiesForNN = {alwaysCoop, alwaysDefect, titForTat, turnEvil};
 NN = {};
 
 %tit =  IllCountToThreeButMayForget(); %TwoInARow(); %TitForTat();
-tit = WhatWillYouDoHT(4,0.25);
-%tit = TitForTat();
+%tit = WhatWillYouDoHT(3,0.34);
+tit = TitForTat();
 lstm = RNNStrategy();
 
 nets = length(NN);
