@@ -106,7 +106,7 @@ if(saveData)
 end
 
 %For all of the epochs.
-for n=1:epochs
+for n=0:epochs
     
     %Reset the states.
     iCTTBMF.resetState();
@@ -141,7 +141,7 @@ for n=1:epochs
             
             %Save data if desired.
             if(saveData)
-                hists{n,a1.get_id(),a2.get_id()}=hist;
+                hists{n+1,a1.get_id(),a2.get_id()}=hist;
             end
         end
     end

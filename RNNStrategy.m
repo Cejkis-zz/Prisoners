@@ -10,9 +10,9 @@ classdef RNNStrategy < Strategy
         % net
         rnn;
         % memory capacity
-        memory_size = 3;
+        memory_size = 4;
         % nr. of future steps
-        future_steps = 3;
+        future_steps = 4;
         
         % learning time and actions played
         training = true;
@@ -27,6 +27,7 @@ classdef RNNStrategy < Strategy
         init_strategy = InitStrat3mem();
         
         % pre-training options
+        pre_trained = false;
         pre_training = false;
         strategies = {AlwaysCooperate(), AlwaysDefect(), TitForTat(), ... 
                       TurnEvil(), Random(), IllCountToThreeButMayForget(), ... 
@@ -63,11 +64,15 @@ classdef RNNStrategy < Strategy
         end
         
         function out = Action(obj, history, id)
+            T = size(history, 1);
             % Load opponent
             if obj.current_opponent ~= id
                 save(strcat(num2str(obj.current_opponent), '.mat'));
                 
                 if ~any(obj.opponents == id)
+                    if obj.pre_trained
+                        obj.load_net_from_file(id);
+                    end
                     obj.opponents = [obj.opponents id];
                     obj.reset_state();
                 else % Has already played against the opponent
@@ -84,18 +89,10 @@ classdef RNNStrategy < Strategy
                 obj.train_net(history);
             end
 
-            T = size(history, 1);
             if T == 0
                 out = 1; % initially Cooperate
             elseif obj.init_time > obj.nr_of_actions
-                p = rand;
-                if p >= 0 %mod(obj.nr_of_actions, obj.noise_ratio) == 0 %T < obj.init_time
-                    out = obj.init_strategy.Action(history);
-                elseif p > 0.25
-                    out = 1;
-                else
-                    out = 0;
-                end
+                out = obj.init_strategy.Action(history);
             else
                 ts = max(1, T+1-obj.memory_size):T;
                 if obj.copy                 
