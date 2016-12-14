@@ -4,16 +4,16 @@ clear
 figure(1)
 %% Parameters
 %The number of iterations the complete simulation will run for.
-epochs=250;
+epochs=500;
 
-% The initial magnitude of the population vector.
-popMag=1000;
+% The total population size.
+popSize=1000;
 
 %The lowest possible sub-population before dying out.
 critPop=1;
 
 %Rounds to run the pd-game for.
-gameRounds=500;
+gameRounds=350;
 
 %How much of the pd rounds that will be cut of. Eg 0.80 would mean that 10%
 %at the beginning and end of the rounds will be discarded in the average.
@@ -24,10 +24,12 @@ mistakeProb=0.035;
 
 %Severity scale. Used to either suppress or increase the harshness of the
 %dynamics. Default is 1;
-sevScale=0.3;
+sevScale=1;
 
 %Flag for saving the histories for the neuralNetworks. Data saved in a matrix.
-saveData=1;
+%USAGE: To check the history between strategy i vs j in epoch k,
+%call hist(k,i,j).
+saveData=0;
 
 %% Set up the involved strategies.
 
@@ -45,14 +47,17 @@ rNNNet=RNNStrategy();
 
 %Store in cell array.
 %  strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,iCTTBMF,wWYDHT,twoInARow};
-  strategiesHandles = {titForTat,alwaysCoop, alwaysDefect, titForTat, turnEvil, random,twoInARow,rNNNet};
-%  strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,twoInARow};
+% strategiesHandles = {titForTat,alwaysCoop, alwaysDefect, titForTat, turnEvil, random,twoInARow,rNNNet};
+ strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,twoInARow,iCTTBMF,wWYDHT};
 nrOfStrategies = length(strategiesHandles);
 
 %% Set up initial population.
 
-population=ones(nrOfStrategies,1);
-population=population/norm(population).*popMag;
+population=ones(nrOfStrategies,1).*popSize/nrOfStrategies;
+
+%Round to closest integers in case population is not properly divisible.
+population=round(population);
+popSize=sum(population);
 
 % Set id for all strategies
 for n=1:nrOfStrategies
@@ -60,7 +65,7 @@ for n=1:nrOfStrategies
     strategy.set_id(n);
 end
 
-% Set up the line animations.
+%Set up the line animations.
 %Preallocation.
 container=repmat(animatedline,nrOfStrategies,1);
 
@@ -68,25 +73,27 @@ container=repmat(animatedline,nrOfStrategies,1);
 clf
 
 %Add the real lines.
-%for n=1:nrOfStrategies
-%    aline=animatedline('Color',[rand rand rand]);
-%    set(aline,'DisplayName',class(strategiesHandles{n}));
-%    container(n)=aline;
-%end
-%Color network red (for presentation)
 for n=1:nrOfStrategies
-    if n==8
-        aline=animatedline('Color',[1 0 0]);
-        set(aline,'DisplayName',class(strategiesHandles{n}));
-        aline.LineWidth = 2;
-        container(n)=aline;
-    else
-        aline=animatedline('Color',[0 0 0]);
-        set(aline,'DisplayName',class(strategiesHandles{n}));
-        container(n)=aline;
-    end
+   aline=animatedline('Color',[rand rand rand]);
+   set(aline,'DisplayName',class(strategiesHandles{n}));
+   container(n)=aline;
 end
 
+%Color network red (for presentation)
+% for n=1:nrOfStrategies
+%     if n==8
+%         aline=animatedline('Color',[1 0 0]);
+%         set(aline,'DisplayName',class(strategiesHandles{n}));
+%         aline.LineWidth = 2;
+%         container(n)=aline;
+%     else
+%         aline=animatedline('Color',[0 0 0]);
+%         set(aline,'DisplayName',class(strategiesHandles{n}));
+%         container(n)=aline;
+%     end
+% end
+
+%Set up the legend object.
 legend('Location','eastoutside');
 leg=legend('show');
 set(leg,'FontSize',10);
@@ -96,12 +103,8 @@ startSave=floor(gameRounds*(1-exPer)/2);
 endsave=gameRounds-startSave;
 
 %Preallocate the data storage if save is desired.
-%USAGE: To check the history between strategy i vs j in epoch k,
-%call hist(k,i,j).
 if(saveData)
     %Find the index of neural network strategies.
-    %TODO
-    
     hists=cell(epochs,nrOfStrategies,nrOfStrategies);
 end
 
@@ -150,7 +153,7 @@ for n=0:epochs
     avgScorePerStrat=sum(results,2)/size(results,2);
     
     %Total average for the epoch.
-%   avgScoreForEpoch=mean(avgScorePerStrat);
+    %avgScoreForEpoch=mean(avgScorePerStrat);
     
     %Weighted average for the epoch.
     popShare=population./sum(population);
@@ -165,8 +168,12 @@ for n=0:epochs
     %Set the change in population depending on the fitness.
     population=population.*fitness;
     
-    %Renormalize to correct population magnitude.
-    population=population./norm(population).*popMag;
+    %Round to an integer amount of agents.
+%     population=round(population);
+    
+    %Renormalize to correct population size.
+    popShare=population./sum(population);
+    population=popShare.*popSize;
     
     %If strategies falls below the critical point, they die and are removed.
     Gr=(population<critPop); %Gr-->GrimReaper has arrived.
@@ -197,11 +204,10 @@ for n=0:epochs
     end
     if(numel(population)==1)
         %Last species standing. Terminate simulation.
+        %Final update to population. Speicies sole survivor.
+        population=popSize;
         break;
     end
-    
-    %Round to an integer amount of agents.
-    %population=round(population);
 end
 
 %Print the strategies still alive. And their share of the population.
