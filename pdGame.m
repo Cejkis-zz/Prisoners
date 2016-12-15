@@ -8,7 +8,6 @@ function [ utilities,history ] = pdGame(a1,a2,gameRounds,mistakeProb)
 %   mistakeProb---The probability of making a mistake during a move in the
 %   game ie 0.02
 
-
 history = zeros(gameRounds,2);
 utilities = zeros(gameRounds,2);
 

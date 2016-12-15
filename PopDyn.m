@@ -24,12 +24,12 @@ mistakeProb=0.035;
 
 %Severity scale. Used to either suppress or increase the harshness of the
 %dynamics. Default is 1;
-sevScale=1;
+sevScale=0.65;
 
 %Flag for saving the histories for the neuralNetworks. Data saved in a matrix.
 %USAGE: To check the history between strategy i vs j in epoch k,
 %call hist(k,i,j).
-saveData=0;
+saveData=1;
 
 %% Set up the involved strategies.
 
@@ -42,13 +42,15 @@ iCTTBMF=IllCountToThreeButMayForget;
 wWYDHT=WhatWillYouDoHT(3,0.34);
 twoInARow=TwoInARow;
 
-rNNNet=RNNStrategy();
+rNNNet1=RNNStrategy();
+rNNNet2=RNNStrategy();
 %swarmNet=NeuralNet(4,[3 2],1);
 
 %Store in cell array.
-%  strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,iCTTBMF,wWYDHT,twoInARow};
-% strategiesHandles = {titForTat,alwaysCoop, alwaysDefect, titForTat, turnEvil, random,twoInARow,rNNNet};
- strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,twoInARow,iCTTBMF,wWYDHT};
+strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,iCTTBMF,wWYDHT,twoInARow};
+% strategiesHandles = {titForTat,alwaysCoop, alwaysDefect, titForTat, turnEvil, random,twoInARow,rNNNet1};
+%  strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,twoInARow,iCTTBMF,wWYDHT};
+%  strategiesHandles = {rNNNet1,rNNNet2};
 nrOfStrategies = length(strategiesHandles);
 
 %% Set up initial population.
@@ -73,25 +75,25 @@ container=repmat(animatedline,nrOfStrategies,1);
 clf
 
 %Add the real lines.
-for n=1:nrOfStrategies
-   aline=animatedline('Color',[rand rand rand]);
-   set(aline,'DisplayName',class(strategiesHandles{n}));
-   container(n)=aline;
-end
+% for n=1:nrOfStrategies
+%    aline=animatedline('Color',[rand rand rand]);
+%    set(aline,'DisplayName',class(strategiesHandles{n}));
+%    container(n)=aline;
+% end
 
 %Color network red (for presentation)
-% for n=1:nrOfStrategies
-%     if n==8
-%         aline=animatedline('Color',[1 0 0]);
-%         set(aline,'DisplayName',class(strategiesHandles{n}));
-%         aline.LineWidth = 2;
-%         container(n)=aline;
-%     else
-%         aline=animatedline('Color',[0 0 0]);
-%         set(aline,'DisplayName',class(strategiesHandles{n}));
-%         container(n)=aline;
-%     end
-% end
+for n=1:nrOfStrategies
+    if n==8
+        aline=animatedline('Color',[1 0 0]);
+        set(aline,'DisplayName',class(strategiesHandles{n}));
+        aline.LineWidth = 2;
+        container(n)=aline;
+    else
+        aline=animatedline('Color',[0 0 0]);
+        set(aline,'DisplayName',class(strategiesHandles{n}));
+        container(n)=aline;
+    end
+end
 
 %Set up the legend object.
 legend('Location','eastoutside');
