@@ -41,6 +41,7 @@ random = Random;
 iCTTBMF=IllCountToThreeButMayForget;
 wWYDHT=WhatWillYouDoHT(3,0.34);
 twoInARow=TwoInARow;
+forgiving = Forgiving;
 
 rNNNet=RNNStrategy();
 %swarmNet=NeuralNet(4,[3 2],1);
@@ -48,7 +49,7 @@ rNNNet=RNNStrategy();
 %Store in cell array.
 %  strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,iCTTBMF,wWYDHT,twoInARow};
 % strategiesHandles = {titForTat,alwaysCoop, alwaysDefect, titForTat, turnEvil, random,twoInARow,rNNNet};
- strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,twoInARow,iCTTBMF,wWYDHT};
+ strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,twoInARow,iCTTBMF,wWYDHT, forgiving};
 nrOfStrategies = length(strategiesHandles);
 
 %% Set up initial population.

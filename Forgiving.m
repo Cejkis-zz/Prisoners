@@ -17,14 +17,16 @@ classdef Forgiving < Strategy & handle
                     obj.mistOk = 1;
                 end
                 
-                if ((history(end, 2) == 0) && obj.mistOk)
-                    obj.mistOk = 0;
-                    out = 1;
-                elseif (history(end, 2))
+                if history(end,2)
                     out = 1;
                 else
-                    out = 0;
-                end        
+                    if obj.mistOk
+                        obj.mistOk = 0;
+                        out = 1;
+                    else
+                        out = 0;
+                    end
+                end
             end
         end
         

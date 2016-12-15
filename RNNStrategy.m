@@ -23,7 +23,7 @@ classdef RNNStrategy < Strategy
         
         % Strategy
         copy = false;
-        init_time = 20000;
+        init_time = 30000;
         init_strategy = InitStrat4mem();
         
         % pre-training options
