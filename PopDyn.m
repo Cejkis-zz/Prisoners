@@ -48,7 +48,6 @@ rNNNet2=RNNStrategy();
 %swarmNet=NeuralNet(4,[3 2],1);
 
 %Store in cell array.
-<<<<<<< HEAD
 strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,iCTTBMF,wWYDHT,twoInARow};
 % strategiesHandles = {titForTat,alwaysCoop, alwaysDefect, titForTat, turnEvil, random,twoInARow,rNNNet1};
 %  strategiesHandles = {alwaysCoop, alwaysDefect, titForTat, turnEvil, random,twoInARow,iCTTBMF,wWYDHT};
