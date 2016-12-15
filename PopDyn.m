@@ -213,13 +213,3 @@ end
 %Print the strategies still alive. And their share of the population.
 disp(strategiesHandles)
 disp(population')
-
-
-
-
-
-
-
-
-
-

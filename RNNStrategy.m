@@ -18,13 +18,13 @@ classdef RNNStrategy < Strategy
         training = true;
         learning_rate = 1;
         learning_rates = {0.1,0.001,0.0001,0.0}; %{2.0, 1.0, 0.5, 0.1, 0.01, 0.0};
-        learning_steps = {10000,500000,1000000}; %{100, 200, 500, 2000, 10000};
+        learning_steps = {20000,500000,1000000}; %{100, 200, 500, 2000, 10000};
         nr_of_actions = 0;
         
         % Strategy
         copy = false;
         init_time = 20000;
-        init_strategy = InitStrat3mem();
+        init_strategy = InitStrat4mem();
         
         % pre-training options
         pre_trained = false;
