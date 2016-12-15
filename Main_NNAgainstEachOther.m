@@ -8,50 +8,33 @@ titForTat = TitForTat;
 turnEvil = TurnEvil;
 random = Random;
 
+rounds = 100;
+gamerounds = 100;
+
 NN = {  ...
-TitForTat,...
-NeuralNet(5,4,1),...
-NeuralNet(4,[3 3],1),...
-NeuralNet(3,[5 3],1),...
-NeuralNet(7,[5 3],1),...
-NeuralNet(2,[3 2],1),...
-NeuralNet(3,[5 3],1),...
-TurnEvil,...
-NeuralNet(5,4,3),...
-NeuralNet(4,[3 3],3),...
-NeuralNet(3,[5 3],3),...
-NeuralNet(7,[5 3],3),...
-NeuralNet(2,[3 2],3),...
-NeuralNet(3,[5 3],3),...
-};
+    TitForTat,...
+    TurnEvil,...
+    };
 
 nets = length(NN);
 
-learningRounds = 3;
-rounds = 100;
-
-Score = zeros(nets,rounds);
+score = zeros(nets,rounds);
 
 for i= 1:rounds
     
-    i
-    
-    for net = 1:nets
-
-        NNOponents = NN;
-        NNOponents(net) = []; % play against all except yourself   
-        
-        if isa(NN{net},'NeuralNet')
-            Score(net,i) = NN{net}.TrainNN(NNOponents, learningRounds); %
-        else
-            Score(net,i) = StrategyScore(NN{net}, NNOponents, 50);
+    for net = 1: nets
+        for net2 = nets:-1:net
+           utilities = pdGame(NN{net}, NN{net2}, gamerounds, 0.02, net, net2);
+           score(net, i) = score(net, i) + u1;
+           score(net2, i)= score(net2, i) + u2;
         end
-        
     end
+    
+    score(:,i) =  score(:,i)/rounds;
     
 end
 
-plot(Score')
+plot(score')
 
 % legend('TFT','NN1', 'NN2', 'NN3', 'NN4', 'NN5','Turnevil')
 
