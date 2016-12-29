@@ -8,7 +8,7 @@ classdef RNN
         n_hidden = 4;
         n_y = 1;
         mean = 0;
-        var = 1;
+        var = 0.5;
         Wx;
         Wh;
         Wy;
@@ -34,6 +34,21 @@ classdef RNN
             o = zeros(T, obj.n_y);
             for t = 1:T % For each time step
                 h(t+1,:) = tanh( obj.Wx * x(t,:)' + obj.Wh * h(t,:)' )';
+                o(t,:) = obj.sigmoid(obj.Wy * h(t+1,:)');
+            end
+        end
+        
+        function [o, h] = forward_propagation_RELU(obj, x)
+            T = size(x,1);
+            % Hidden states
+            h = zeros(T + 1, obj.n_hidden);
+            h(1, :) = zeros(1, obj.n_hidden);
+            % Outputs
+            o = zeros(T, obj.n_y);
+            for t = 1:T % For each time step
+                h_tp1 = obj.Wx * x(t,:)' + obj.Wh * h(t,:)';
+                relu = h_tp1 > 0;
+                h(t+1,:) = relu' .* h_tp1';
                 o(t,:) = obj.sigmoid(obj.Wy * h(t+1,:)');
             end
         end
@@ -65,7 +80,32 @@ classdef RNN
                 end
             end
         end
-                 
+                
+        function [dEdWx, dEdWh, dEdWy] = bptt_RELU(obj, x, y)
+            T = size(y, 1);
+            [o, h] = obj.forward_propagation_RELU(x);
+            dEdWx = zeros(size(obj.Wx));
+            dEdWh = zeros(size(obj.Wh));
+            dEdWy = zeros(size(obj.Wy));
+            dEdo = - (y - o);
+            dEdWyh =  dEdo .* o.*(1-o); %obj.d_sigmoid(h(end,:));
+            % For each output backwards.
+            for t = T:-1:1
+                dEdWy = dEdWy + dEdWyh(t,:) .* h(t+1,:); % outer product
+                % Initial delta calculation
+                delta_t = (obj.Wy' * dEdWyh(t,:)) .* (1 - (h(t+1,:)' .^ 2));
+                % Backpropagation through time (for at most obj.bptt_truncate steps)
+                bptt_steps = t:-1:max(1, t-obj.bptt_truncate);
+                for bptt_step = bptt_steps
+                    dEdWh = dEdWh + delta_t * h(bptt_step+1,:); % outer product            
+                    dEdWx = dEdWx + delta_t * x(bptt_step,:);   % outer product
+                    % Update delta for next step
+                    relu = h(bptt_step+1,:) > 0;
+                    delta_t = obj.Wh' * delta_t .* relu';
+                end
+            end
+        end
+        
         function obj = sgd(obj, x, y, n)
             [dEdWx, dEdWh, dEdWy] = obj.bptt(x, y);
             
