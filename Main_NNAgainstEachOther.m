@@ -1,40 +1,51 @@
 
 clear;
-
+global Strategies;
 % creating handlers for all strategies
 alwaysCoop = AlwaysCooperate;
 alwaysDefect = AlwaysDefect;
 titForTat = TitForTat;
 turnEvil = TurnEvil;
 random = Random;
+iCTTBMF=IllCountToThreeButMayForget;
+wWYDHT=WhatWillYouDoHT(15,0.25);
+twoInARow=TwoInARow;
 
-rounds = 100;
+rounds = 200;
 gamerounds = 100;
 
-NN = {  ...
-    TitForTat,...
-    TurnEvil,...
+% Strategies = { NN};
+Strategies = {  ...
+    NeuralNetFFCustom([8 4 2], 10, gamerounds ),...
+    NeuralNetFFCustom([5 6 4], 10, gamerounds ),...
+    NeuralNetFFCustom([8 4], 10, gamerounds ),...
+    AlwaysDefect,...
     };
 
-nets = length(NN);
+nets = length(Strategies);
 
-score = zeros(nets,rounds);
+scoretime = nan(nets, rounds);
 
 for i= 1:rounds
     
+    score = zeros(nets,nets);
+    
+%     NN.TrainNN(enemies);
+    
     for net = 1: nets
         for net2 = nets:-1:net
-           utilities = pdGame(NN{net}, NN{net2}, gamerounds, 0.02, net, net2);
-           score(net, i) = score(net, i) + u1;
-           score(net2, i)= score(net2, i) + u2;
+           v = pdGame(Strategies{net}, Strategies{net2}, gamerounds, 0.0);
+           u = mean (v);
+           score(net, net2) =  u(1);
+           score(net2, net) =  u(2);
         end
     end
     
-    score(:,i) =  score(:,i)/rounds;
-    
+    scoretime(:,i) = mean(score');
+    plot(scoretime')
+    legend('NN1','NN2','NN3');
+    pause(0.0001);
 end
-
-plot(score')
 
 % legend('TFT','NN1', 'NN2', 'NN3', 'NN4', 'NN5','Turnevil')
 
