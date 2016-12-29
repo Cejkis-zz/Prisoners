@@ -17,8 +17,8 @@ classdef RNNStrategy < Strategy
         % learning time and actions played
         training = true;
         learning_rate = 1;
-        learning_rates = {0.1,0.001,0.0001,0.0}; %{2.0, 1.0, 0.5, 0.1, 0.01, 0.0};
-        learning_steps = {20000,500000,1000000}; %{100, 200, 500, 2000, 10000};
+        learning_rates = {0.1,0.01,0.001,0.0}; %{2.0, 1.0, 0.5, 0.1, 0.01, 0.0};
+        learning_steps = {1000,30000,1000000}; %{100, 200, 500, 2000, 10000};
         nr_of_actions = 0;
         
         % Strategy
@@ -28,11 +28,13 @@ classdef RNNStrategy < Strategy
         
         % pre-training options
         pre_trained = false;
-        pre_training = false;
-        strategies = {AlwaysCooperate(), AlwaysDefect(), TitForTat(), ... 
-                      TurnEvil(), Random(), IllCountToThreeButMayForget(), ... 
-                      WhatWillYouDoHT(4,0.25), TwoInARow()};
-                  
+        pre_training = true;
+        pre_training_time = 30000;
+        %strategies = {AlwaysCooperate(), AlwaysDefect(), TitForTat(), ... 
+        %              TurnEvil(), Random(), IllCountToThreeButMayForget(), ... 
+        %              WhatWillYouDoHT(4,0.25), TwoInARow()};
+        strategies = {TitForTat()};
+            
         % Opponents
         opponents = [];
         current_opponent = 0;
@@ -67,14 +69,18 @@ classdef RNNStrategy < Strategy
             T = size(history, 1);
             % Load opponent
             if obj.current_opponent ~= id
-                save(strcat(num2str(obj.current_opponent), '.mat'));
+                
+                if obj.current_opponent > 0
+                    save(strcat(num2str(obj.current_opponent), '.mat'));
+                end
                 
                 if ~any(obj.opponents == id)
-                    if obj.pre_trained
-                        obj.load_net_from_file(id);
+                    if obj.pre_training
+                        obj.load_net_from_file(obj.id);
+                    else
+                        obj.reset_state();
                     end
                     obj.opponents = [obj.opponents id];
-                    obj.reset_state();
                 else % Has already played against the opponent
                     obj.load_state(id);
                 end
@@ -152,22 +158,22 @@ classdef RNNStrategy < Strategy
                 
         function pre_train(obj)
             for strategy = obj.strategies
-                obj.reset_training_settings();
-                rounds = 200;
-                history = [];
-                for r = 1:rounds
-                    me = round(obj.Action(history));
-                    opponent = strategy{1}.Action(history);
+                history = [1,1];
+                for r = 1:obj.pre_training_time
+                    me = round(obj.Action(history, obj.id));
+                    opponent = strategy{1}.Action([history(:,2),history(:,1)]);
                     history = [history; me opponent];
                 end
             end
+            obj.update_training_settings();
+            save(strcat(num2str(obj.id), '.mat'));
         end
         
-        function reset_training_settings(obj)
-            obj.learning_rounds = 2000;
-            obj.learning_rate = 2.0;
-            obj.half_time = 50;
-            obj.nr_of_actions = 0;
+        function update_training_settings(obj)
+            %obj.nr_of_actions = 0;
+            obj.learning_rate = 1;
+            obj.learning_steps = {obj.pre_training_time+3000,obj.pre_training_time+50000, obj.pre_training_time+100000}; %{100, 200, 500, 2000, 10000};
+            %obj.init_time = 0;
         end
         
         function stop_training(obj)
@@ -188,6 +194,11 @@ classdef RNNStrategy < Strategy
             obj.rnn = file.obj.rnn;
             obj.learning_rate = file.obj.learning_rate;
             obj.nr_of_actions = file.obj.nr_of_actions;
+        end
+        
+        function load_net_from_file(obj, id)
+            file = load(strcat(num2str(id), '.mat'));
+            obj.rnn = file.obj.rnn;
         end
     end 
 end
