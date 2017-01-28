@@ -17,18 +17,18 @@ classdef RNNStrategy < Strategy
         % learning time and actions played
         training = true;
         learning_rate = 1;
-        learning_rates = {0.1,0.01,0.001,0.0}; %{2.0, 1.0, 0.5, 0.1, 0.01, 0.0};
+        learning_rates = {0.5,0.1,0.01,0.001}; %{2.0, 1.0, 0.5, 0.1, 0.01, 0.0};
         learning_steps = {1000,30000,1000000}; %{100, 200, 500, 2000, 10000};
         nr_of_actions = 0;
         
         % Strategy
         copy = false;
-        init_time = 30000;
+        init_time = 80000;
         init_strategy = InitStrat4mem();
         
         % pre-training options
         pre_trained = false;
-        pre_training = true;
+        pre_training = false;
         pre_training_time = 30000;
         %strategies = {AlwaysCooperate(), AlwaysDefect(), TitForTat(), ... 
         %              TurnEvil(), Random(), IllCountToThreeButMayForget(), ... 
@@ -76,7 +76,9 @@ classdef RNNStrategy < Strategy
                 
                 if ~any(obj.opponents == id)
                     if obj.pre_training
-                        obj.load_net_from_file(obj.id);
+                        obj.load_net_from_file(0);
+                        obj.nr_of_actions = obj.pre_training_time;
+                        obj.learning_rate = 1;
                     else
                         obj.reset_state();
                     end
@@ -172,7 +174,7 @@ classdef RNNStrategy < Strategy
         function update_training_settings(obj)
             %obj.nr_of_actions = 0;
             obj.learning_rate = 1;
-            obj.learning_steps = {obj.pre_training_time+3000,obj.pre_training_time+50000, obj.pre_training_time+100000}; %{100, 200, 500, 2000, 10000};
+            obj.learning_steps = {obj.pre_training_time+1000,obj.pre_training_time+30000, obj.pre_training_time+100000}; %{100, 200, 500, 2000, 10000};
             %obj.init_time = 0;
         end
         
